@@ -7,7 +7,7 @@ import github
 github_app = GithubApp()
 
 # Handle pull request opened
-@github_app.on(event_type='pull_request', action='opened')
+@github_app.on(event_type='pull_request', actions=('opened', 'synchronize'))
 def handle_pull_request_opened(request, payload):
     # Get the repository and pull request number from the payload
     repo_full_name = payload['repository']['full_name']
@@ -60,7 +60,7 @@ def handle_pull_request_opened(request, payload):
                     start_line=comment['start_line'], 
                     start_side=comment['start_side']
                 )
-        except github.GithubException.GithubException as e:
+        except github.GithubException as e:
             if e.status == 422 and 'Validation Failed' in str(e):
                 # Handle validation failed exception
                 logging.error(f"Validation failed when creating review comment: {e}")

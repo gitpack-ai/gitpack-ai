@@ -24,13 +24,18 @@ class GithubApp:
         raise RuntimeError('Invalid payload')
         
 
-    def on(self, event_type, action=None):
+    def on(self, event_type, actions=None):
         """
         Decorator to register event handlers for GitHub webhook events.
         """
         def decorator(func):
-            key = (event_type, action)
-            self.event_handlers[key] = func
+            if isinstance(actions, tuple):
+                for action in actions:
+                    key = (event_type, action)
+                    self.event_handlers[key] = func
+            else:
+                key = (event_type, actions)
+                self.event_handlers[key] = func
             return func
         return decorator
 
@@ -69,9 +74,7 @@ class GithubApp:
 
         payload = json.loads(request.body)
         action = payload.get('action')
-        print('event_handlers', self.event_handlers, event_type, action)
         handler = self.event_handlers.get((event_type, action)) or self.event_handlers.get((event_type, None))
-        print('github_webhook: handler', handler)
         if handler:
             return handler(request, payload)
         else:

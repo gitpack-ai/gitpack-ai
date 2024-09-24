@@ -65,7 +65,7 @@ class OpenAIHelper:
                 {
                     "role": "system", 
                     "content": "You are a Staff or Principal level Software Engineer. In this contexrt you are acting as a code reviewer. You provide only the high quality feedback and avoid trivial feedback."
-                }
+                },
                 {
                     "role": "user", 
                     "content": prompt
@@ -90,10 +90,10 @@ class OpenAIHelper:
         
         logging.debug('GPT-4 response: %s', response_json)
 
-        return _parse_gpt_response(response_json)
+        return self._parse_gpt_response(response_json)
 
     def _parse_gpt_response(self, feedback_json):
-        overall_feedback = f"## Code Review for PR: {pr_title}\n\n{feedback_json['overall']['summary']}\n\n"
+        overall_feedback = f"## Code Review for this PR\n\n{feedback_json['overall']['summary']}\n\n"
         if feedback_json['overall'].get('positives'):
             if type(feedback_json['overall']['positives']) is list:
                 positives = ''.join(f'- {s}\n' for s in feedback_json['overall']['positives'])
