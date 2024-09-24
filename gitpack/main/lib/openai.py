@@ -1,6 +1,7 @@
 from openai import OpenAI
 import json, re
 from django.conf import settings
+import logging
 
 class OpenAIHelper:
 
@@ -55,8 +56,9 @@ class OpenAIHelper:
 
             === Code ends here
         """ % (code)
-        #print('prompt:', prompt) 
-        
+
+        #logging.debug('Prompt: %s', prompt)
+
         response = self.client.chat.completions.create(
             model="gpt-4o",
             messages=[
@@ -72,14 +74,14 @@ class OpenAIHelper:
             try:
                 response_json_str = re.search(r'^(?:(?:```json)|(?:```)|(?:json))(.*?)(?:```)?$', response_content, re.DOTALL).group(1)
             except AttributeError:
-                print("response: ", response_content)
+                logging.error('No JSON response found in GPT-4 response')
                 raise ValueError('No JSON response found in GPT-4 response')
             try:
                 response_json = json.loads(response_json_str)
             except json.JSONDecodeError:
-                print("response_json_str: ", response_json_str)
+                logging.error('Invalid JSON response from GPT-4. Response: %s', response_json_str)
                 raise ValueError('Invalid JSON response from GPT-4')
-        from pprint import pprint
-        print("response_json: ")
-        pprint(response_json)
+        
+        logging.debug('GPT-4 response: %s', response_json)
+
         return response_json
