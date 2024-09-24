@@ -29,7 +29,7 @@ class OpenAIHelper:
                     "improvements": ["", ""]
                 },
                 "inline_feedback": [
-                        // line specific feedback goes here. use the diff notation to provide the absolute line number and diff offset
+                        // Inline feedback goes here. Limit the inline feedback to only where there is important areas for improvement. Avoid providing feedback unless it is significant and very impactful.
                         { 
                             // relative path of the file
                             "file_path": "",
@@ -62,8 +62,14 @@ class OpenAIHelper:
         response = self.client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": "You are a code reviewer."},
-                {"role": "user", "content": prompt}
+                {
+                    "role": "system", 
+                    "content": "You are a Staff or Principal level Software Engineer. In this contexrt you are acting as a code reviewer. You provide only the high quality feedback and avoid trivial feedback."
+                }
+                {
+                    "role": "user", 
+                    "content": prompt
+                }
             ],
             max_tokens=1500
         )
@@ -84,4 +90,36 @@ class OpenAIHelper:
         
         logging.debug('GPT-4 response: %s', response_json)
 
-        return response_json
+        return _parse_gpt_response(response_json)
+
+    def _parse_gpt_response(self, feedback_json):
+        overall_feedback = f"## Code Review for PR: {pr_title}\n\n{feedback_json['overall']['summary']}\n\n"
+        if feedback_json['overall'].get('positives'):
+            if type(feedback_json['overall']['positives']) is list:
+                positives = ''.join(f'- {s}\n' for s in feedback_json['overall']['positives'])
+            else:
+                positives = feedback_json['overall']['positives']
+            overall_feedback += f"### Positives:\n\n{positives}\n\n"
+        if feedback_json['overall'].get('improvements'):
+            #if type of feedback_json['overall']['improvements']) is list
+            if type(feedback_json['overall']['improvements']) is list:
+                improvements = ''.join(f'- {s}\n' for s in feedback_json['overall']['improvements'])
+            else:
+                improvements = feedback_json['overall']['improvements']
+            overall_feedback += f"### Areas of Improvement:\n\n{improvements}\n\n"
+        
+        # Based on GPT feedback, add specific line comments if improvements are needed
+        line_comments = []
+        if feedback_json.get('inline_feedback'):
+            for feedback in feedback_json['inline_feedback']:
+                line_comments.append({
+                    'body': f"{feedback['feedback']}",
+                    'filename': feedback['file_path'],
+                    'start_line': feedback['start_line'],
+                    'start_side': feedback['start_side'],
+                    'end_line': feedback['end_line'],
+                    'end_side': feedback['end_side'],
+                    'suggested_change': feedback.get('suggested_change', None)
+                })
+        
+        return overall_feedback, line_comments
