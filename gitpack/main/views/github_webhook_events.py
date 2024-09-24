@@ -93,17 +93,17 @@ def handle_pull_request_opened(request, payload):
     return JsonResponse({'status': f"Handled pull_request.opened: {pr_number}"}, status=200)
 
 # Handle issue opened
-@github_app.on(event_type='issues', action='opened')
-def handle_issue_opened(request, payload):
-    issue_title = payload['issue']['title']
-    issue_url = payload['issue']['html_url']
-    print(f"Issue opened: {issue_title} ({issue_url})")
-    return JsonResponse({'status': f"Handled issues.opened: {issue_title}"}, status=200)
+# @github_app.on(event_type='issues', action='opened')
+# def handle_issue_opened(request, payload):
+#     issue_title = payload['issue']['title']
+#     issue_url = payload['issue']['html_url']
+#     print(f"Issue opened: {issue_title} ({issue_url})")
+#     return JsonResponse({'status': f"Handled issues.opened: {issue_title}"}, status=200)
 
-# Additional events can be handled in a similar way
-@github_app.on(event_type='pull_request', action='closed')
-def handle_pull_request_closed(request, payload):
-    pr_title = payload['pull_request']['title']
-    pr_url = payload['pull_request']['html_url']
-    print(f"Pull request closed: {pr_title} ({pr_url})")
-    return JsonResponse({'status': f"Handled pull_request.closed: {pr_title}"}, status=200)
+# # Additional events can be handled in a similar way
+# @github_app.on(event_type='pull_request', action='closed')
+# def handle_pull_request_closed(request, payload):
+#     pr_title = payload['pull_request']['title']
+#     pr_url = payload['pull_request']['html_url']
+#     print(f"Pull request closed: {pr_title} ({pr_url})")
+#     return JsonResponse({'status': f"Handled pull_request.closed: {pr_title}"}, status=200)
