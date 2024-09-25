@@ -1,4 +1,4 @@
-from .github_webhook import GithubApp
+from ._github_webhook_wrapper import GithubApp
 from django.http import JsonResponse
 from main.lib.openai import OpenAIHelper
 import logging
@@ -34,6 +34,8 @@ def handle_pull_request_opened(request, payload):
         file_content = file.raw_url
         file_patch = file.patch
         query += f"File path: {file.filename}\n\nContent:\n{file.patch}\n\n"
+
+    logging.debug(f"Query: {query}")
 
     # Initialize OpenAIHelper
     openai_helper = OpenAIHelper()

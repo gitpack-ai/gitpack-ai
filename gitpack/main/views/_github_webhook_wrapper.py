@@ -61,7 +61,6 @@ class GithubApp:
         """
         Main view to handle GitHub webhook requests.
         """
-        print('github_webhook: ENTER', request.headers)
         if request.method != 'POST':
             return HttpResponseForbidden('Method not allowed')
 
