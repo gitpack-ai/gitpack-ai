@@ -2,3 +2,4 @@ django==5.1.1
 requests==2.32.3
 openai==1.47.1
 PyGithub==2.4.0
+colorlog

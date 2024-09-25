@@ -100,6 +100,47 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Loggers
+# Logging configuration that logs to console if DEBUG is True
+if DEBUG:
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'formatters': {
+            'colored': {
+                '()': 'colorlog.ColoredFormatter',
+                'format': '%(log_color)s%(levelname)-8s%(reset)s %(log_color)s%(message)s',
+                'log_colors': {
+                    'DEBUG': 'cyan',
+                    'INFO': 'green',
+                    'WARNING': 'yellow',
+                    'ERROR': 'red',
+                    'CRITICAL': 'red,bg_white',
+                },
+            },
+        },
+        'handlers': {
+            'console': {
+                'class': 'colorlog.StreamHandler',
+                'formatter': 'colored',
+                'level': 'DEBUG',
+            },
+        },
+        'loggers': {
+            '': {  # Root logger
+                'handlers': ['console'],
+                'level': 'DEBUG',
+            },
+            'django': {
+                'handlers': ['console'],
+                'level': 'INFO',
+                'propagate': False,
+            },
+        },
+    }
+
+
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
