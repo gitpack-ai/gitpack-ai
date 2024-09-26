@@ -1,6 +1,7 @@
 from openai import OpenAI
 import json, re
 from django.conf import settings
+import logging
 
 class OpenAIHelper:
 
@@ -79,12 +80,6 @@ class OpenAIHelper:
             except json.JSONDecodeError:
                 print("response_json_str: ", response_json_str)
                 raise ValueError('Invalid JSON response from GPT-4')
-<<<<<<< Updated upstream
-        from pprint import pprint
-        print("response_json: ")
-        pprint(response_json)
-        return response_json
-=======
         
         logging.debug('GPT-4 response:\n\n%s\n\n', json.dumps(response_json, indent=4, sort_keys=True))
 
@@ -192,4 +187,3 @@ class OpenAIHelper:
             return None, None, None, None
 
         return start_line, start_side, end_line, end_side
->>>>>>> Stashed changes

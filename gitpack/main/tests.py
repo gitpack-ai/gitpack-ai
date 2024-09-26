@@ -1,8 +1,6 @@
 from django.test import TestCase
 
-<<<<<<< Updated upstream
-# Create your tests here.
-=======
+
 class FilesChangedTest:
     def __init__(self, filename, patch):
         self.filename = filename
@@ -103,4 +101,3 @@ class TestExtractLineNumbers(TestCase):
         result = openai_helper._extract_line_numbers(file_patch=file_patch, code_lines=code_lines)
 
         self.assertEqual(result, (167, 'RIGHT', 184, 'RIGHT'))
->>>>>>> Stashed changes
