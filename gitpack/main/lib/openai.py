@@ -79,7 +79,117 @@ class OpenAIHelper:
             except json.JSONDecodeError:
                 print("response_json_str: ", response_json_str)
                 raise ValueError('Invalid JSON response from GPT-4')
+<<<<<<< Updated upstream
         from pprint import pprint
         print("response_json: ")
         pprint(response_json)
         return response_json
+=======
+        
+        logging.debug('GPT-4 response:\n\n%s\n\n', json.dumps(response_json, indent=4, sort_keys=True))
+
+        return self._parse_gpt_response(response_json, files_changed_dict)
+
+    def _parse_gpt_response(self, feedback_json, files_changed_dict):
+        overall_feedback = f"## Code Review for this PR\n\n{feedback_json['summary']['summary']}\n\n"
+        if feedback_json['summary'].get('positives'):
+            if isinstance(feedback_json['summary']['positives'], list):
+                positives = ''.join(f'- {s}\n' for s in feedback_json['summary']['positives'])
+            else:
+                positives = feedback_json['summary']['positives']
+            overall_feedback += f"### Positives:\n\n{positives}\n\n"
+        if feedback_json['summary'].get('improvements'):
+            #if type of feedback_json['summary']['improvements']) is list
+            if isinstance(feedback_json['summary']['improvements'], list):
+                improvements = ''.join(f'- {s}\n' for s in feedback_json['summary']['improvements'])
+            else:
+                improvements = feedback_json['summary']['improvements']
+            overall_feedback += f"### Areas of Improvement:\n\n{improvements}\n\n"
+        
+        # Based on GPT feedback, add specific line comments if improvements are needed
+        line_comments = []
+        if feedback_json.get('inline_feedback'):
+            for feedback in feedback_json['inline_feedback']:
+                # start_line and end_line provided by GPT have been known to be unreliable. 
+                # So, we need to extract the line numbers based on the diff notation in the file patch and the code lines provided in the GPT response
+                file_patch = files_changed_dict[feedback['file_path']]
+                start_line, start_side, end_line, end_side = self._extract_line_numbers(file_patch, feedback['code_lines'])
+
+                if start_line is None or end_line is None:
+                    logging.error(f"Could not find the specified code lines in the patch. Feedback: {feedback}")
+                    continue
+                if feedback['start_side'] == feedback['end_side'] and start_line > end_line:
+                    logging.error(f"Invalid extraction of line numbers. Feedback: {feedback}")
+                    continue
+
+                line_comments.append({
+                    'body': f"{feedback['feedback']}",
+                    'filename': feedback['file_path'],
+                    'start_line': start_line,
+                    'start_side': feedback['start_side'],
+                    'end_line': end_line,
+                    'end_side': feedback['end_side'],
+                    'suggested_code_changes': feedback.get('suggested_code_changes', None)
+                })
+
+        return overall_feedback, line_comments
+
+    # Extract the line numbers from the diff notation
+    def _extract_line_numbers(self, file_patch, code_lines):
+        logging.debug(f"File patch: {file_patch}")
+        logging.debug(f"Code lines: {code_lines}")
+        
+        patch_lines = file_patch.split('\n')
+        code_block = '\n'.join(line.lstrip('+-').strip() for line in code_lines)
+        
+        new_current_line = old_current_line = 1
+        start_line = end_line = None
+        start_side = end_side = None
+
+        start_code_line = code_lines[0].strip()
+        
+        for i, line in enumerate(patch_lines):
+            if line.startswith('@@'):
+                match = re.match(r'^@@ -(\d+)(?:,\d+)? \+(\d+)(?:,\d+)? @@', line)
+                if match:
+                    old_current_line = int(match.group(1))
+                    new_current_line = int(match.group(2))
+                continue
+            
+            # Check if the code block starts at this line
+            effective_line = line.strip()
+            if not start_code_line.startswith('-') or not start_code_line.startswith('+'):
+                effective_line = line[1:].strip()
+            if start_line is None and effective_line == start_code_line:
+                potential_block = '\n'.join(line.lstrip('+-').strip() for line in patch_lines[i:i+len(code_lines)])
+                if potential_block.strip() == code_block.strip():
+                    start_line = new_current_line if line.startswith('+') else old_current_line
+                    end_line = start_line + len(code_lines) - 1
+                    start_side = end_side = 'RIGHT' if line.startswith('+') else 'LEFT'
+                    break
+                # else:
+                #     # OpenAI is known to not return exact code block. It's generally correct but has small differences. 
+                #     # So, it's best to call this good enough check. Ideally we should only have above check
+                #     start_line = new_current_line if line.startswith('+') else old_current_line
+                #     end_line = start_line + len(code_lines) - 1
+                #     start_side = end_side = 'RIGHT' if line.startswith('+') else 'LEFT'
+                #     logging.debug('** Did "good enough" check for extracting lines **')
+                #     break
+                
+            
+                logging.debug(f"potential_block len: {len(patch_lines[i:i+len(code_lines)])} code_block: {len(code_lines)}")
+                logging.debug(f"potential_block:\n{potential_block}\n\n code_block:\n{code_block}")
+            
+            if line.startswith('-'):
+                old_current_line += 1
+            elif line.startswith('+'):
+                new_current_line += 1
+            else:
+                old_current_line += 1
+                new_current_line += 1
+        
+        if start_line is None or end_line is None:
+            return None, None, None, None
+
+        return start_line, start_side, end_line, end_side
+>>>>>>> Stashed changes
