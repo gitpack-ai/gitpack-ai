@@ -53,7 +53,7 @@ To create a GitHub App for Gitpack AI, follow these steps:
 6. Generate a private key for your app and download it.
 7. Install the app on your repositories.
 
-### Setting up the webhook:
+Setting up the webhook:
 1. In your app settings, ensure the Webhook URL is set to where your Django app will handle incoming webhooks (e.g., `https://your-domain.com/webhook/`).
 2. Generate a secure random string for the Webhook secret. You can use a command like this:
    ```bash

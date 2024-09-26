@@ -8,14 +8,10 @@ from django.views.decorators.csrf import csrf_exempt
 from github import Github, Auth, GithubIntegration
 
 class GithubApp:
-    _instance = None
 
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super(GithubApp, cls).__new__(cls)
-            cls._instance.event_handlers = {}
-            # cls._instance.github_installation = cls._instance.init_github()
-        return cls._instance
+    def __init__(self):
+        self.event_handlers = {}
+        #self.github_installation = self.init_github()
 
     def get_github_client(self, payload):
         """
@@ -28,18 +24,13 @@ class GithubApp:
         raise RuntimeError('Invalid payload')
         
 
-    def on(self, event_type, actions=None):
+    def on(self, event_type, action=None):
         """
         Decorator to register event handlers for GitHub webhook events.
         """
         def decorator(func):
-            if isinstance(actions, tuple):
-                for action in actions:
-                    key = (event_type, action)
-                    self.event_handlers[key] = func
-            else:
-                key = (event_type, actions)
-                self.event_handlers[key] = func
+            key = (event_type, action)
+            self.event_handlers[key] = func
             return func
         return decorator
 
@@ -65,6 +56,7 @@ class GithubApp:
         """
         Main view to handle GitHub webhook requests.
         """
+        print('github_webhook: ENTER', request.headers)
         if request.method != 'POST':
             return HttpResponseForbidden('Method not allowed')
 
@@ -77,9 +69,10 @@ class GithubApp:
 
         payload = json.loads(request.body)
         action = payload.get('action')
+        print('event_handlers', self.event_handlers, event_type, action)
         handler = self.event_handlers.get((event_type, action)) or self.event_handlers.get((event_type, None))
+        print('github_webhook: handler', handler)
         if handler:
             return handler(request, payload)
         else:
             return JsonResponse({'status': f"Unhandled event: {event_type}.{action}"}, status=200)
-
