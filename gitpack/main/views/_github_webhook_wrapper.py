@@ -8,10 +8,14 @@ from django.views.decorators.csrf import csrf_exempt
 from github import Github, Auth, GithubIntegration
 
 class GithubApp:
+    _instance = None
 
-    def __init__(self):
-        self.event_handlers = {}
-        #self.github_installation = self.init_github()
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(GithubApp, cls).__new__(cls)
+            cls._instance.event_handlers = {}
+            # cls._instance.github_installation = cls._instance.init_github()
+        return cls._instance
 
     def get_github_client(self, payload):
         """
@@ -78,3 +82,4 @@ class GithubApp:
             return handler(request, payload)
         else:
             return JsonResponse({'status': f"Unhandled event: {event_type}.{action}"}, status=200)
+
