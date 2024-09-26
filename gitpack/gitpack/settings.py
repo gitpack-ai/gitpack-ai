@@ -164,6 +164,25 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+CODE_REVIEW_IGNORE_PATTERNS = [
+    '.*\.md',
+    '.*\.txt',
+    '.*\.json',
+    '.*\.yml',
+    '.*\.yaml',
+    '.*\.ini',
+    '.*\.cfg',
+    '.*\.conf',
+    '.*\.log',
+    '.*\.pid',
+    '.*\.lock',
+    '.*\.tmp',
+    '.*\.bak',
+    '.*\.old',
+    '.*\.save',
+    '.*\.backup',
+]
+
 GITHUBAPP_ID = os.environ.get('GITHUBAPP_ID')
 GITHUBAPP_KEY = os.environ.get('GITHUBAPP_KEY')
 if not GITHUBAPP_KEY:

@@ -1,9 +1,10 @@
+import github.PullRequest
 from ._github_webhook_wrapper import GithubApp
 from django.http import JsonResponse
 from main.lib.openai import OpenAIHelper
 import logging
 import github
-
+import json
 github_app = GithubApp()
 
 # Handle pull request opened
@@ -24,58 +25,54 @@ def handle_pull_request_opened(request, payload):
     # Get the list of files changed in the pull request
     files_changed = pull_request.get_files()
 
-    latest_commit = pull_request.get_commits()[0]
-
-    query = ""
-
-    # Loop through each changed file
-    for file in files_changed:
-        # Get the file content and diff
-        file_content = file.raw_url
-        file_patch = file.patch
-        query += f"File path: {file.filename}\n\nContent:\n{file.patch}\n\n"
-
-    logging.debug(f"Query: {query}")
+    # Get all commits and select the last one (latest)
+    commits = list(pull_request.get_commits())
+    latest_commit = commits[-1]
 
     # Initialize OpenAIHelper
     openai_helper = OpenAIHelper()
-    overall_feedback, line_comments = openai_helper.get_code_review(query)
+    overall_feedback, line_comments = openai_helper.get_code_review(files_changed) 
 
-    # Post line-specific comments
+    logging.debug(f"Overall feedback: {overall_feedback}")
+    logging.debug(f"Line comments: {json.dumps(line_comments, indent=4, default=str)}")
+
+    comments = []
+
+    # Add line-specific comments to the review
     for comment in line_comments:
         try:
+            comment_body = comment['body']
+            if comment['suggested_code_changes']:
+                if isinstance(comment['suggested_code_changes'], list):
+                    suggested_code_changes = "\n".join(comment['suggested_code_changes'])
+                else:
+                    suggested_code_changes = comment['suggested_code_changes']
+                comment_body += f"\n\n```suggestion\n{suggested_code_changes}\n```"
+            
             if comment['start_line'] == comment['end_line']:
-                pull_request.create_review_comment(
-                    body=comment['body'], 
-                    commit=latest_commit,
+                comments.append(github.PullRequest.ReviewComment(
+                    body=comment_body, 
                     path=comment['filename'], 
                     line=comment['start_line'], 
                     side=comment['start_side']
-                )
+                ))
             else:
-                pull_request.create_review_comment(
-                    body=comment['body'], 
-                    commit=latest_commit,
+                comments.append(github.PullRequest.ReviewComment(
+                    body=comment_body, 
                     path=comment['filename'], 
                     line=comment['end_line'], 
                     side=comment['end_side'],
                     start_line=comment['start_line'], 
                     start_side=comment['start_side']
-                )
-        except github.GithubException as e:
-            if e.status == 422 and 'Validation Failed' in str(e):
-                # Handle validation failed exception
-                logging.error(f"Validation failed when creating review comment: {e}")
-                # You might want to skip this comment or try an alternative approach
-                continue
-            else:
-                # Handle other GitHub exceptions
-                logging.error(f"GitHub API error when creating review comment: {e}")
-                # You might want to retry or handle the error in some way
-                raise
+                ))
+        except Exception as e:
+            logging.error(f"Error when creating review comment: {e}")
+            logging.debug(f"Comment: {json.dumps(comment, indent=4, default=str)}")
+            # Continue with other comments instead of raising an exception
+            continue
 
-    # Post overall review comment
-    pull_request.create_issue_comment(overall_feedback)  
+    # Submit the review with the overall feedback as the body
+    review = pull_request.create_review(commit=latest_commit, body=overall_feedback, comments=comments)
 
     return JsonResponse({'status': f"Handled pull_request.opened: {pr_number}"}, status=200)
 

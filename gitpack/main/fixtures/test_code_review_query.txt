@@ -1,15 +1,54 @@
-File path: README.md
+File path: gitpack/gitpack/settings.py
 
 Content:
-@@ -53,7 +53,7 @@ To create a GitHub App for Gitpack AI, follow these steps:
- 6. Generate a private key for your app and download it.
- 7. Install the app on your repositories.
+@@ -100,6 +100,47 @@
+     },
+ ]
  
--Setting up the webhook:
-+### Setting up the webhook:
- 1. In your app settings, ensure the Webhook URL is set to where your Django app will handle incoming webhooks (e.g., `https://your-domain.com/webhook/`).
- 2. Generate a secure random string for the Webhook secret. You can use a command like this:
-    ```bash
++# Loggers
++# Logging configuration that logs to console if DEBUG is True
++if DEBUG:
++    LOGGING = {
++        'version': 1,
++        'disable_existing_loggers': False,
++        'formatters': {
++            'colored': {
++                '()': 'colorlog.ColoredFormatter',
++                'format': '%(log_color)s%(levelname)-8s%(reset)s %(log_color)s%(message)s',
++                'log_colors': {
++                    'DEBUG': 'cyan',
++                    'INFO': 'green',
++                    'WARNING': 'yellow',
++                    'ERROR': 'red',
++                    'CRITICAL': 'red,bg_white',
++                },
++            },
++        },
++        'handlers': {
++            'console': {
++                'class': 'colorlog.StreamHandler',
++                'formatter': 'colored',
++                'level': 'DEBUG',
++            },
++        },
++        'loggers': {
++            '': {  # Root logger
++                'handlers': ['console'],
++                'level': 'DEBUG',
++            },
++            'django': {
++                'handlers': ['console'],
++                'level': 'INFO',
++                'propagate': False,
++            },
++        },
++    }
++
++
++
+ 
+ # Internationalization
+ # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
 File path: gitpack/main/lib/openai.py
 
@@ -22,16 +61,45 @@ Content:
  
  class OpenAIHelper:
  
-@@ -28,7 +29,7 @@ def get_code_review(self, code):
-                     "improvements": ["", ""]
-                 },
+@@ -19,19 +20,13 @@ def get_code_review(self, code):
+             Only provide a RFC8259 compliant JSON response. Follow this format without deviation. Do not include any other text or explanations. Also, provide json in raw string format without any quotes,
+             ```
+             {
+-                "overall": {
+-                    // overall feedback summary goes here.
+-                    "summary": "",
+-                    // positive feedback goes here. provide a list of string type. This section is optional. If you don't see significant positives skip this section.
+-                    "positives": ["", ""],
+-                    // areas of improvement goes here. provide a a list of string type. This section is optional. If you don't see any areas of improvements skip this section.
+-                    "improvements": ["", ""]
+-                },
                  "inline_feedback": [
 -                        // line specific feedback goes here. use the diff notation to provide the absolute line number and diff offset
-+                        // Inline feedback goes here. Limit the inline feedback to only where there is important areas for improvement. Avoid providing feedback unless it is significant and very impactful.
++                        // Inline feedback goes here. Limit the inline feedback to only where there is important areas for improvement. Avoid providing feedback unless it is significant and very impactful. Avoid positive feedback.
                          { 
                              // relative path of the file
                              "file_path": "",
-@@ -55,13 +56,20 @@ def get_code_review(self, code):
++                            // actual line content of the code for which feedback is provided.
++                            "actual_line_content": "",
+                             // start side of the diff for the multiple line feedback. Response should be strictly either "LEFT" or "RIGHT"
+                             "start_side": "",
+                             // start line number of the code in the file. This has to be an absolute line number. It's important to provide the correct line number based on the diff offset.
+@@ -46,6 +41,14 @@ def get_code_review(self, code):
+                             "suggested_change": ""
+                         },
+                 ],
++                "summary": {
++                    // feedback summary goes here. Don't just repeat the inline feedback, but provide a strong summary and comment on the overall changes.
++                    "summary": "",
++                    // positive feedback goes here. This section is optional. If you don't see significant positives skip this section.
++                    "positives": ["", ""],
++                    // areas of improvement goes here. This section is optional. If you don't see any areas of improvements skip this section.
++                    "improvements": ["", ""]
++                },
+             }
+             ```
+ 
+@@ -55,13 +58,20 @@ def get_code_review(self, code):
  
              === Code ends here
          """ % (code)
@@ -56,7 +124,7 @@ Content:
              ],
              max_tokens=1500
          )
-@@ -72,14 +80,46 @@ def get_code_review(self, code):
+@@ -72,14 +82,46 @@ def get_code_review(self, code):
              try:
                  response_json_str = re.search(r'^(?:(?:```json)|(?:```)|(?:json))(.*?)(?:```)?$', response_content, re.DOTALL).group(1)
              except AttributeError:
@@ -74,24 +142,24 @@ Content:
 -        pprint(response_json)
 -        return response_json
 +        
-+        logging.debug('GPT-4 response: %s', response_json)
++        logging.debug('GPT-4 response:\n\n%s\n\n', json.dumps(response_json, indent=4, sort_keys=True))
 +
 +        return self._parse_gpt_response(response_json)
 +
 +    def _parse_gpt_response(self, feedback_json):
-+        overall_feedback = f"## Code Review for this PR\n\n{feedback_json['overall']['summary']}\n\n"
-+        if feedback_json['overall'].get('positives'):
-+            if type(feedback_json['overall']['positives']) is list:
-+                positives = ''.join(f'- {s}\n' for s in feedback_json['overall']['positives'])
++        overall_feedback = f"## Code Review for this PR\n\n{feedback_json['summary']['summary']}\n\n"
++        if feedback_json['summary'].get('positives'):
++            if type(feedback_json['summary']['positives']) is list:
++                positives = ''.join(f'- {s}\n' for s in feedback_json['summary']['positives'])
 +            else:
-+                positives = feedback_json['overall']['positives']
++                positives = feedback_json['summary']['positives']
 +            overall_feedback += f"### Positives:\n\n{positives}\n\n"
-+        if feedback_json['overall'].get('improvements'):
-+            #if type of feedback_json['overall']['improvements']) is list
-+            if type(feedback_json['overall']['improvements']) is list:
-+                improvements = ''.join(f'- {s}\n' for s in feedback_json['overall']['improvements'])
++        if feedback_json['summary'].get('improvements'):
++            #if type of feedback_json['summary']['improvements']) is list
++            if type(feedback_json['summary']['improvements']) is list:
++                improvements = ''.join(f'- {s}\n' for s in feedback_json['summary']['improvements'])
 +            else:
-+                improvements = feedback_json['overall']['improvements']
++                improvements = feedback_json['summary']['improvements']
 +            overall_feedback += f"### Areas of Improvement:\n\n{improvements}\n\n"
 +        
 +        # Based on GPT feedback, add specific line comments if improvements are needed
@@ -110,7 +178,35 @@ Content:
 +        
 +        return overall_feedback, line_comments
 
-File path: gitpack/main/views/github_webhook.py
+File path: gitpack/main/tests.py
+
+Content:
+@@ -1,3 +1,22 @@
+ from django.test import TestCase
++from .lib.openai import OpenAIHelper
++
++
++class TestOpenAIHelper(TestCase):
++    
++    def test_get_code_review(self):
++        openai_helper = OpenAIHelper()
++
++        # Load test data from a fixture file
++        with open('gitpack/main/fixtures/test_code_review_query.txt', 'r') as file:
++            test_query = file.read()
++
++        overall_feedback, line_comments = openai_helper.get_code_review(test_query)
++        
++        from pprint import pprint
++        pprint(overall_feedback)
++        pprint(line_comments)
++
++        self.assertIsNotNone(overall_feedback)
++        self.assertIsNotNone(line_comments)
+ 
+-# Create your tests here.
+
+File path: gitpack/main/views/_github_webhook_wrapper.py
 
 Content:
 @@ -24,13 +24,18 @@ def get_github_client(self, payload):
@@ -135,7 +231,15 @@ Content:
              return func
          return decorator
  
-@@ -69,9 +74,7 @@ def github_webhook(self, request):
+@@ -56,7 +61,6 @@ def github_webhook(self, request):
+         """
+         Main view to handle GitHub webhook requests.
+         """
+-        print('github_webhook: ENTER', request.headers)
+         if request.method != 'POST':
+             return HttpResponseForbidden('Method not allowed')
+ 
+@@ -69,9 +73,7 @@ def github_webhook(self, request):
  
          payload = json.loads(request.body)
          action = payload.get('action')
@@ -150,7 +254,8 @@ File path: gitpack/main/views/github_webhook_events.py
 
 Content:
 @@ -1,11 +1,13 @@
- from .github_webhook import GithubApp
+-from .github_webhook import GithubApp
++from ._github_webhook_wrapper import GithubApp
  from django.http import JsonResponse
  from main.lib.openai import OpenAIHelper
 +import logging
@@ -173,8 +278,12 @@ Content:
      query = ""
  
      # Loop through each changed file
-@@ -33,77 +37,43 @@ def handle_pull_request_opened(request, payload):
+@@ -31,79 +35,47 @@ def handle_pull_request_opened(request, payload):
+         file_patch = file.patch
+         query += f"File path: {file.filename}\n\nContent:\n{file.patch}\n\n"
  
++    logging.debug(f"Query: {query}")
++
      # Initialize OpenAIHelper
      openai_helper = OpenAIHelper()
 -    feedback_json = openai_helper.get_code_review(query)
@@ -286,3 +395,10 @@ Content:
 -    print(f"Pull request closed: {pr_title} ({pr_url})")
 -    return JsonResponse({'status': f"Handled pull_request.closed: {pr_title}"}, status=200)
 
+File path: load_env.sh
+
+Content:
+@@ -0,0 +1,2 @@
++#!/bin/bash
++export $(grep -v '^#' .env | xargs)
+\ No newline at end of file
