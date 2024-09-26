@@ -1,11 +1,14 @@
-from .github_webhook import GithubApp
+import github.PullRequest
+from ._github_webhook_wrapper import GithubApp
 from django.http import JsonResponse
 from main.lib.openai import OpenAIHelper
-
+import logging
+import github
+import json
 github_app = GithubApp()
 
 # Handle pull request opened
-@github_app.on(event_type='pull_request', action='opened')
+@github_app.on(event_type='pull_request', actions=('opened', 'synchronize'))
 def handle_pull_request_opened(request, payload):
     # Get the repository and pull request number from the payload
     repo_full_name = payload['repository']['full_name']
@@ -22,88 +25,54 @@ def handle_pull_request_opened(request, payload):
     # Get the list of files changed in the pull request
     files_changed = pull_request.get_files()
 
-    query = ""
-
-    # Loop through each changed file
-    for file in files_changed:
-        # Get the file content and diff
-        file_content = file.raw_url
-        file_patch = file.patch
-        query += f"File path: {file.filename}\n\nContent:\n{file.patch}\n\n"
+    # Get all commits and select the last one (latest)
+    commits = list(pull_request.get_commits())
+    latest_commit = commits[-1]
 
     # Initialize OpenAIHelper
     openai_helper = OpenAIHelper()
-    feedback_json = openai_helper.get_code_review(query)
+    overall_feedback, line_comments = openai_helper.get_code_review(files_changed) 
 
-    overall_feedback = f"## Code Review for PR: {pr_title}\n\n{feedback_json['overall']['summary']}\n\n"
-    if feedback_json['overall'].get('positives'):
-        if type(feedback_json['overall']['positives']) is list:
-            positives = ''.join(f'- {s}\n' for s in feedback_json['overall']['positives'])
-        else:
-            positives = feedback_json['overall']['positives']
-        overall_feedback += f"### Positives:\n\n{positives}\n\n"
-    if feedback_json['overall'].get('improvements'):
-        #if type of feedback_json['overall']['improvements']) is list
-        if type(feedback_json['overall']['improvements']) is list:
-            improvements = ''.join(f'- {s}\n' for s in feedback_json['overall']['improvements'])
-        else:
-            improvements = feedback_json['overall']['improvements']
-        overall_feedback += f"### Areas of Improvement:\n\n{improvements}\n\n"
-    
-    # Based on GPT feedback, add specific line comments if improvements are needed
-    line_comments = []
-    if feedback_json.get('inline_feedback'):
-        for feedback in feedback_json['inline_feedback']:
-            line_comments.append({
-                'body': f"{feedback['feedback']}",
-                'filename': feedback['file_path'],
-                'start_line': feedback['start_line'],
-                'start_side': feedback['start_side'],
-                'end_line': feedback['end_line'],
-                'end_side': feedback['end_side'],
-                'suggested_change': feedback.get('suggested_change', None)
-            })
+    logging.debug(f"Overall feedback: {overall_feedback}")
+    logging.debug(f"Line comments: {json.dumps(line_comments, indent=4, default=str)}")
 
-    # Post overall review comment
-    pull_request.create_issue_comment(overall_feedback)
+    comments = []
 
-    print('line_comments:', line_comments, 'pull_request.head.sha:', pull_request.head.sha)
-    latest_commit = pull_request.get_commits()[0]
-    # Post line-specific comments
+    # Add line-specific comments to the review
     for comment in line_comments:
-        if comment['start_line'] == comment['end_line']:
-            pull_request.create_review_comment(
-                body=comment['body'], 
-                commit=latest_commit,
-                path=comment['filename'], 
-                line=comment['start_line'], 
-                side=comment['start_side']
-            )
-        else:
-            pull_request.create_review_comment(
-                body=comment['body'], 
-                commit=latest_commit,
-                path=comment['filename'], 
-                line=comment['end_line'], 
-                side=comment['end_side'],
-                start_line=comment['start_line'], 
-                start_side=comment['start_side']
-            )  
+        try:
+            comment_body = comment['body']
+            if comment['suggested_code_changes']:
+                if isinstance(comment['suggested_code_changes'], list):
+                    suggested_code_changes = "\n".join(comment['suggested_code_changes'])
+                else:
+                    suggested_code_changes = comment['suggested_code_changes']
+                comment_body += f"\n\n```suggestion\n{suggested_code_changes}\n```"
+            
+            if comment['start_line'] == comment['end_line']:
+                comments.append(github.PullRequest.ReviewComment(
+                    body=comment_body, 
+                    path=comment['filename'], 
+                    line=comment['start_line'], 
+                    side=comment['start_side']
+                ))
+            else:
+                comments.append(github.PullRequest.ReviewComment(
+                    body=comment_body, 
+                    path=comment['filename'], 
+                    line=comment['end_line'], 
+                    side=comment['end_side'],
+                    start_line=comment['start_line'], 
+                    start_side=comment['start_side']
+                ))
+        except Exception as e:
+            logging.error(f"Error when creating review comment: {e}")
+            logging.debug(f"Comment: {json.dumps(comment, indent=4, default=str)}")
+            # Continue with other comments instead of raising an exception
+            continue
+
+    # Submit the review with the overall feedback as the body
+    review = pull_request.create_review(commit=latest_commit, body=overall_feedback, comments=comments)
 
     return JsonResponse({'status': f"Handled pull_request.opened: {pr_number}"}, status=200)
 
-# Handle issue opened
-@github_app.on(event_type='issues', action='opened')
-def handle_issue_opened(request, payload):
-    issue_title = payload['issue']['title']
-    issue_url = payload['issue']['html_url']
-    print(f"Issue opened: {issue_title} ({issue_url})")
-    return JsonResponse({'status': f"Handled issues.opened: {issue_title}"}, status=200)
-
-# Additional events can be handled in a similar way
-@github_app.on(event_type='pull_request', action='closed')
-def handle_pull_request_closed(request, payload):
-    pr_title = payload['pull_request']['title']
-    pr_url = payload['pull_request']['html_url']
-    print(f"Pull request closed: {pr_title} ({pr_url})")
-    return JsonResponse({'status': f"Handled pull_request.closed: {pr_title}"}, status=200)
