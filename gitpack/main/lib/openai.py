@@ -138,85 +138,80 @@ class OpenAIHelper:
                 file_patch = files_changed_dict[feedback['file_path']]
                 start_line, start_side, end_line, end_side = self._extract_line_numbers(file_patch, feedback['code_lines'])
 
-                if start_line is not None and end_line is not None:
-                    line_comments.append({
-                        'body': f"{feedback['feedback']}",
-                        'filename': feedback['file_path'],
-                        'start_line': start_line,
-                        'start_side': feedback['start_side'],
-                        'end_line': end_line,
-                        'end_side': feedback['end_side'],
-                        'suggested_code_changes': feedback.get('suggested_code_changes', None)
-                    })
-                else:
+                if start_line is None or end_line is None:
                     logging.error(f"Could not find the specified code lines in the patch. Feedback: {feedback}")
-        
+                    continue
+                if feedback['start_side'] == feedback['end_side'] and start_line > end_line:
+                    logging.error(f"Invalid extraction of line numbers. Feedback: {feedback}")
+                    continue
+
+                line_comments.append({
+                    'body': f"{feedback['feedback']}",
+                    'filename': feedback['file_path'],
+                    'start_line': start_line,
+                    'start_side': feedback['start_side'],
+                    'end_line': end_line,
+                    'end_side': feedback['end_side'],
+                    'suggested_code_changes': feedback.get('suggested_code_changes', None)
+                })
+
         return overall_feedback, line_comments
 
     # Extract the line numbers from the diff notation
     def _extract_line_numbers(self, file_patch, code_lines):
-        # logging.debug(f"File patch: {file_patch}")
-        # logging.debug(f"Code lines: {code_lines}")
+        logging.debug(f"File patch: {file_patch}")
+        logging.debug(f"Code lines: {code_lines}")
         
-        lines = file_patch.split('\n')
+        patch_lines = file_patch.split('\n')
+        code_block = '\n'.join(line.lstrip('+-').strip() for line in code_lines)
+        
+        new_current_line = old_current_line = 1
         start_line = end_line = None
         start_side = end_side = None
-        new_current_line = 1
-        old_current_line = 1
+
         start_code_line = code_lines[0].strip()
-        end_code_line = code_lines[-1].strip()
-        for line in lines:
+        
+        for i, line in enumerate(patch_lines):
             if line.startswith('@@'):
-                # Parse the diff header
-                # Extract the old and new line numbers from the diff header
                 match = re.match(r'^@@ -(\d+)(?:,\d+)? \+(\d+)(?:,\d+)? @@', line)
                 if match:
-                    old_start = int(match.group(1))
-                    new_start = int(match.group(2))
-                else:
-                    logging.warning(f"Failed to parse diff header: {line}")
-                    continue
-                
-                new_current_line = int(new_start)
-                old_current_line = int(old_start)
+                    old_current_line = int(match.group(1))
+                    new_current_line = int(match.group(2))
                 continue
             
-            if line.startswith('-'):
-                side = 'LEFT'
-            elif line.startswith('+'):
-                side = 'RIGHT'
-            else:
-                side = 'RIGHT'  # Unchanged lines are considered on the right side
-
+            # Check if the code block starts at this line
             effective_line = line.strip()
             if not start_code_line.startswith('-') or not start_code_line.startswith('+'):
                 effective_line = line[1:].strip()
             if start_line is None and effective_line == start_code_line:
-                if side == 'RIGHT':
-                    start_line = new_current_line
-                else:
-                    start_line = old_current_line
-                start_side = side
+                potential_block = '\n'.join(line.lstrip('+-').strip() for line in patch_lines[i:i+len(code_lines)])
+                if potential_block.strip() == code_block.strip():
+                    start_line = new_current_line if line.startswith('+') else old_current_line
+                    end_line = start_line + len(code_lines) - 1
+                    start_side = end_side = 'RIGHT' if line.startswith('+') else 'LEFT'
+                    break
+                # else:
+                #     # OpenAI is known to not return exact code block. It's generally correct but has small differences. 
+                #     # So, it's best to call this good enough check. Ideally we should only have above check
+                #     start_line = new_current_line if line.startswith('+') else old_current_line
+                #     end_line = start_line + len(code_lines) - 1
+                #     start_side = end_side = 'RIGHT' if line.startswith('+') else 'LEFT'
+                #     logging.debug('** Did "good enough" check for extracting lines **')
+                #     break
                 
-            if not end_code_line.startswith('-') or not end_code_line.startswith('+'):
-                effective_line = line[1:].strip()
-            if end_line is None and effective_line == end_code_line:   
-                if side == 'RIGHT':
-                    end_line = new_current_line
-                else:
-                    end_line = old_current_line
-                end_side = side
-            if start_line is not None and end_line is not None:
-                break
+            
+                logging.debug(f"potential_block len: {len(patch_lines[i:i+len(code_lines)])} code_block: {len(code_lines)}")
+                logging.debug(f"potential_block:\n{potential_block}\n\n code_block:\n{code_block}")
             
             if line.startswith('-'):
                 old_current_line += 1
-            else:
+            elif line.startswith('+'):
                 new_current_line += 1
-            
+            else:
+                old_current_line += 1
+                new_current_line += 1
         
         if start_line is None or end_line is None:
-            
             return None, None, None, None
 
         return start_line, start_side, end_line, end_side
