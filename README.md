@@ -1,4 +1,4 @@
-# Gitpack AI
+# GitPack AI
 A Github AI Bot to be the first reviewer for your pull requests
 
 ## Installation
@@ -62,3 +62,17 @@ To create a GitHub App for Gitpack AI, follow these steps:
 3. Save this secret in your app settings and in your environment variables.
 
 Remember to update your environment variables with the new GitHub App details:
+
+## Usage
+
+To use the Gitpack AI bot for automatic PR reviews, follow these steps:
+
+1. Ensure the GitHub App is installed on your repository.
+
+2. When a new pull request is opened or updated in your repository, the bot will automatically:
+   - Analyze the changes in the pull request
+   - Generate an overall review of the changes
+   - Provide line-specific comments and suggestions
+
+The bot automatically triggers on new PRs or updates to existing PRs. There's no need for manual intervention to initiate a review.
+
