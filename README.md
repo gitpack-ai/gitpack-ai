@@ -69,7 +69,16 @@ To use the Gitpack AI bot for automatic PR reviews, follow these steps:
 
 1. Ensure the GitHub App is installed on your repository.
 
-2. When a new pull request is opened or updated in your repository, the bot will automatically:
+2. Install the GitHub App on your repository:
+   - Go to your GitHub repository
+   - Click on "Settings" in the top menu
+   - Select "Integrations" from the left sidebar
+   - Click on "Add GitHub App" in the "Installed GitHub Apps" section
+   - Find "Gitpack AI" (or the name you chose) in the list
+   - Click "Install"
+
+
+3. When a new pull request is opened or updated in your repository, the bot will automatically:
    - Analyze the changes in the pull request
    - Generate an overall review of the changes
    - Provide line-specific comments and suggestions
