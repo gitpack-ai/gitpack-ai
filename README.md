@@ -1,5 +1,5 @@
 # GitPack AI
-**A Github AI Bot/App that's first reviewer for your pull requests**
+An AI Bot that acts as a first reviewer for your pull requests
 
 ## Installation
 
