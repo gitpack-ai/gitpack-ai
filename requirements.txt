@@ -4,3 +4,4 @@ openai==1.47.1
 PyGithub==2.4.0
 colorlog==6.8.2
 djangorestframework==3.15.2
+dj-rest-auth==6.0.0
