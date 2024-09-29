@@ -7,9 +7,6 @@ import LogoComponent from '../components/Logo';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 
-interface GoogleAuthResponse {
-  authorization_url: string;
-}
 
 export default function Login() {
   const pathname = usePathname()
@@ -18,35 +15,18 @@ export default function Login() {
   const [errorMsg, setErrorMsg] = useState('');
   const router = useRouter();
 
-  const signupWithGoogle = async () => {
-    try {
-      const responseData: GoogleAuthResponse = await fetchJson(
-        `/auth/o/google-oauth2/?redirect_uri=${process.env.NEXT_PUBLIC_API_HOST}/oauth/callback/google-oauth2`, 
-        {
-          method: "GET",
-          credentials: "include",
-        }
-      );
-      console.log(responseData);
-      window.location.replace(responseData.authorization_url)
-    } catch (error) {
-      if (error instanceof FetchError) {
-        setErrorMsg(error.data.message)
-      } else {
-        console.error('An unexpected error happened:', error)
-      }
-    }
-  }
+  const handleGitHubLogin = () => {
+    // Replace with your actual Django backend URL
+    const backendUrl = 'http://localhost:8000';
+    const githubLoginUrl = `${backendUrl}/auth/github/redirect/`;
+    
+    // Redirect to the GitHub login URL
+    window.location.href = githubLoginUrl;
+  };
+
 
   useEffect(() => {
-    // if(auth.user){
-    //   router.push('/onboarding');
-    // }
-    // const token = searchParams.get('t');
-    // if(token){
-    //   auth.setAccessToken(token);
-    //   auth.initAuth(() => {});
-    // }
+
   }, [pathname, searchParams])
 
   return (
@@ -61,7 +41,7 @@ export default function Login() {
 
         <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
           <button
-            onClick={signupWithGoogle}
+            onClick={handleGitHubLogin}
             className="w-full border border-gray-300 focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center justify-center mr-2 mb-2"
           >
             <svg className="mr-2 -ml-1 w-4 h-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="github" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">

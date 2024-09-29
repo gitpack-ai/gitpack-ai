@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
+from rest_framework.authentication import TokenAuthentication
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,6 +28,7 @@ SECRET_KEY = 'django-insecure-gr^&_jd(pp-6%0qyehq_(y=o(p6dxx3d8gh(3sxa%(s-!7z2kc
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
+FRONTEND_HOST = 'http://localhost:3000'
 
 
 # Application definition
@@ -38,12 +40,20 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'main',
+    'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
-    'dj_rest_auth'
+    'dj_rest_auth',
+    'allauth',
+    'allauth.account',
+    'dj_rest_auth.registration',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.github',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -51,6 +61,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'gitpack.urls'
@@ -79,8 +90,12 @@ WSGI_APPLICATION = 'gitpack.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'gitpack',
+        'USER': 'user',
+        'PASSWORD': 'password',
+        'HOST': 'db',
+        'PORT': '5432',
     }
 }
 
@@ -167,6 +182,8 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+
 CODE_REVIEW_IGNORE_PATTERNS = [
     '.*\.md',
     '.*\.txt',
@@ -198,3 +215,36 @@ GITHUB_WEBHOOK_SECRET = os.environ.get('GITHUB_WEBHOOK_SECRET')
 OPENAI_ORGANIZATION = os.environ.get('GITPACK_OPENAI_ORGANIZATION')
 OPENAI_PROJECT = os.environ.get('GITPACK_OPENAI_PROJECT')
 OPENAI_API_KEY = os.environ.get('GITPACK_OPENAI_API_KEY')
+
+GITHUB_CLIENT_ID = os.environ.get('GITHUB_CLIENT_ID')
+GITHUB_CLIENT_SECRET = os.environ.get('GITHUB_CLIENT_SECRET')
+GITHUB_CALLBACK_URL = f'{FRONTEND_HOST}/auth/github/callback'
+
+SOCIALACCOUNT_PROVIDERS = {
+    'github': {
+        'APP': {
+            'client_id': GITHUB_CLIENT_ID,
+            'secret': GITHUB_CLIENT_SECRET,
+            'key': ''
+        },
+    }
+}
+
+# Add these settings at the end of the file
+CORS_ALLOW_ALL_ORIGINS = True  # For development only, not recommended for production
+CORS_ALLOW_CREDENTIALS = True
+
+# For more specific control, you can use:
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+
+# Add this REST_FRAMEWORK configuration
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        # You can include other authentication classes here if needed
+    ],
+    # You can add other REST_FRAMEWORK settings here as well
+}

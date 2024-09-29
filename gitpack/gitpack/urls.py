@@ -16,10 +16,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from main.views.auth.github import GitHubLogin, github_login_redirect
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('auth/', include('dj_rest_auth.urls')),
-
+    path('auth/registration/', include('dj_rest_auth.registration.urls')),
+    path('auth/github/', GitHubLogin.as_view(), name='github_login'),
+    path('auth/github/redirect/', github_login_redirect, name='github_login_redirect'),
     path("", include("main.urls")),
 ]
