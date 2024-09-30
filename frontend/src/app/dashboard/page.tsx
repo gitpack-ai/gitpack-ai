@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'; // Changed from 'next/router'
 import { useAuth } from '../lib/useAuth';
 import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline'
-import fetchJson from '../lib/fetchJson';
+import fetchJson, {FetchError} from '../lib/fetchJson';
 
 
 const navigation = [
@@ -28,8 +28,11 @@ export default function Dashboard() {
         if (!auth.isLoggedIn && !auth.isLoading) {
             router.push('/login');
         }
-        getGithubRepos();
     }, [auth, router]);
+
+    useEffect(() => {
+        getGithubRepos();
+    }, []);
 
     const logout = async () => {
         await auth.logout();
@@ -37,7 +40,7 @@ export default function Dashboard() {
 
     const getGithubRepos = async () => {
         try {
-            const repositories = await fetchJson('/api/github/repos');
+            const repositories = await fetchJson('/api/github/repos?is_app_installed=1');
             setRepos(repositories);
         } catch (error) {
             if (error instanceof FetchError) {

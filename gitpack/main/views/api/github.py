@@ -4,7 +4,8 @@ from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from allauth.socialaccount.models import SocialAccount
-from github import Github
+from github import Github, GithubIntegration
+from django.conf import settings
 
 class GitHubRepositoriesView(APIView):
     permission_classes = [IsAuthenticated]
@@ -12,10 +13,11 @@ class GitHubRepositoriesView(APIView):
     def _get_repos_with_app_installed(self, access_token):
         g = Github(access_token)
         user = g.get_user()
-        installations = g.get_user().get_installations()
         
         repos_with_app = []
-        for installation in installations:
+        github_integration = GithubIntegration(settings.GITHUBAPP_ID, settings.GITHUBAPP_KEY)
+        installations = github_integration.get_installations()
+        for installation in installations: 
             for repo in installation.get_repos():
                 repos_with_app.append({
                     'name': repo.name,
