@@ -1,10 +1,4 @@
-import Cookies from 'universal-cookie';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_HOST;
-
-export const makeUrl = (endpoint: string): string => {
-  return API_BASE + endpoint;
-}
 
 export class FetchError extends Error {
     response: Response
@@ -30,14 +24,13 @@ export class FetchError extends Error {
       this.response = response
       this.data = data ?? { message: message }
     }
-  }
+}
   
-  export default async function fetchJson<JSON = unknown>(
-    input: string,
-    init?: RequestInit
-  ): Promise<JSON> {
-    const cookies = new Cookies();
-    const auth_token = cookies.get('auth_token');
+export default async function fetchJson<JSON = unknown>(
+  input: string,
+  init?: RequestInit
+): Promise<JSON> {
+    const auth_token = localStorage.getItem('authToken');
     let updatedInit = {
       ...init,
       credentials: 'include',
@@ -51,7 +44,7 @@ export class FetchError extends Error {
       updatedInit.headers.Authorization = `Token ${auth_token}`;
     }
     // @ts-ignore
-    const response = await fetch(makeUrl(input), updatedInit);
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}${input}`, updatedInit);
     // if the server replies, there's always some data in json
     // if there's a network error, it will throw at the previous line
     const data = await response.json()

@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'dj_rest_auth.registration',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.github',
+    'drf_yasg'
 ]
 
 MIDDLEWARE = [
@@ -184,6 +185,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 
+SWAGGER_SETTINGS = {
+    "SECURITY_DEFINITIONS": {
+        "Bearer": {"type": "apiKey", "name": "Authorization", "in": "header"}
+    }
+}
+
 CODE_REVIEW_IGNORE_PATTERNS = [
     '.*\.md',
     '.*\.txt',
@@ -229,6 +236,8 @@ SOCIALACCOUNT_PROVIDERS = {
         },
     }
 }
+SOCIALACCOUNT_STORE_TOKENS = True
+SOCIALACCOUNT_ONLY = True
 
 # Add these settings at the end of the file
 CORS_ALLOW_ALL_ORIGINS = True  # For development only, not recommended for production

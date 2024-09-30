@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation'; // Changed from 'next/router'
 import { useAuth } from '../lib/useAuth';
 import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import fetchJson from '../lib/fetchJson';
 
 
 const navigation = [
@@ -21,15 +22,31 @@ function classNames(...classes) {
 export default function Dashboard() {
     const auth = useAuth();
     const router = useRouter();
+    const [repos, setRepos] = useState([]);
 
     useEffect(() => {
         if (!auth.isLoggedIn && !auth.isLoading) {
             router.push('/login');
         }
+        getGithubRepos();
     }, [auth, router]);
 
     const logout = async () => {
         await auth.logout();
+    }
+
+    const getGithubRepos = async () => {
+        try {
+            const repositories = await fetchJson('/api/github/repos');
+            setRepos(repositories);
+        } catch (error) {
+            if (error instanceof FetchError) {
+                console.error('Error fetching GitHub repositories:', error.data);
+            } else {
+                console.error('Error fetching GitHub repositories:', error);
+            }
+            // Handle the error appropriately in your UI
+        }
     }
 
     if (!auth.isLoggedIn) {
@@ -155,11 +172,24 @@ export default function Dashboard() {
 
         <header className="bg-white shadow">
           <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900">Dashboard</h1>
+            <h1 className="text-3xl font-bold tracking-tight text-gray-900">Repositories</h1>
           </div>
         </header>
         <main>
-          <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">{/* Your content */}</div>
+            <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+                <ul role="list" className="divide-y divide-gray-100">
+                {repos.map((repo) => (
+                    <li key={repo.url} className="flex justify-between gap-x-6 py-5">
+                        <div className="flex min-w-0 gap-x-4">
+                            <div className="min-w-0 flex-auto">
+                                <p className="text-sm font-semibold leading-6 text-gray-900">{repo.full_name}</p>
+                                <p className="mt-1 truncate text-xs leading-5 text-gray-500">{repo.description}</p>
+                            </div>
+                        </div>
+                    </li>
+                ))}
+                </ul>
+          </div>
         </main>
       </div>
     </>
