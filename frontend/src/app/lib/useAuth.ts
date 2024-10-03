@@ -84,7 +84,7 @@ export function useAuth() {
     const token = localStorage.getItem('authToken');
     if (token) {
       try {
-        await fetch('/auth/logout/', {
+        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/logout/`, {
           method: 'POST',
           headers: {
             'Authorization': `Token ${token}`,

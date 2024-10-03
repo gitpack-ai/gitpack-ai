@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation'; // Changed from 'next/router'
 import { useAuth } from '../lib/useAuth';
+import { ProtectedRoute, useUser } from '../components/ProtectedRoute';
 import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import fetchJson, {FetchError} from '../lib/fetchJson';
@@ -23,14 +24,9 @@ function classNames(...classes) {
 
 export default function Dashboard() {
     const auth = useAuth();
+    const user = useUser();
     const router = useRouter();
     const [repos, setRepos] = useState([]);
-
-    useEffect(() => {
-        if (!auth.isLoggedIn && !auth.isLoading) {
-            router.push('/login');
-        }
-    }, [auth, router]);
 
     useEffect(() => {
         getGithubRepos();
@@ -38,6 +34,7 @@ export default function Dashboard() {
 
     const logout = async () => {
         await auth.logout();
+        router.push('/login');
     }
 
     const getGithubRepos = async () => {
@@ -54,12 +51,8 @@ export default function Dashboard() {
         }
     }
 
-    if (!auth.isLoggedIn) {
-        return "Loading..."; // Or you can return a loading indicator
-    }
-
     return (
-    <>
+    <ProtectedRoute>
       <div className="min-h-full">
         <Disclosure as="nav" className="bg-gray-800">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -152,13 +145,13 @@ export default function Dashboard() {
             <div className="border-t border-gray-700 pb-3 pt-4">
               <div className="flex items-center px-5">
                 <div className="flex-shrink-0">
-                  <svg className="h-10 w-10 rounded-full text-gray-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <svg className="h-10 w-10 rounded-full text-gray-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                     <path fillRule="evenodd" d="M18.685 19.097A9.723 9.723 0 0021.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 003.065 7.097A9.716 9.716 0 0012 21.75a9.716 9.716 0 006.685-2.653zm-12.54-1.285A7.486 7.486 0 0112 15a7.486 7.486 0 015.855 2.812A8.224 8.224 0 0112 20.25a8.224 8.224 0 01-5.855-2.438zM15.75 9a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" clipRule="evenodd" />
                   </svg>
                 </div>
                 <div className="ml-3">
-                  <div className="text-base font-medium leading-none text-white">{auth.user.first_name}</div>
-                  <div className="text-sm font-medium leading-none text-gray-400">{auth.user.email}</div>
+                  <div className="text-base font-medium leading-none text-white">{user ? user.first_name : ''}</div>
+                  <div className="text-sm font-medium leading-none text-gray-400">{user ? user.email : ''}</div>
                 </div>
               </div>
               <div className="mt-3 space-y-1 px-2">
@@ -221,6 +214,6 @@ export default function Dashboard() {
           </div>
         </main>
       </div>
-    </>
+    </ProtectedRoute>
   )
 }
