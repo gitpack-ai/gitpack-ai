@@ -12,7 +12,7 @@ services:
     
   web:
     build: .
-    command: python gitpack/manage.py runserver 0.0.0.0:8000
+    command: gunicorn --bind 0.0.0.0:8000 gitpack.wsgi:application
     volumes:
       - .:/code
     ports:
