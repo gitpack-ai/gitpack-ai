@@ -6,7 +6,7 @@ set -o errexit
 pip install -r requirements.txt
 
 # Convert static asset files
-python gitpack/manage.py collectstatic --no-input
+#python gitpack/manage.py collectstatic --no-input
 
 # Apply any outstanding database migrations
 python gitpack/manage.py migrate

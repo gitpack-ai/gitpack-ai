@@ -10,7 +10,7 @@ services:
     name: gitpack
     runtime: python
     buildCommand: "./build.sh"
-    startCommand: "python -m gunicorn --chdir /code/gitpack gitpack.wsgi:application -k uvicorn.workers.UvicornWorker"
+    startCommand: "python -m gunicorn --chdir gitpack gitpack.wsgi:application -k uvicorn.workers.UvicornWorker"
     envVars:
       - key: DATABASE_URL
         fromDatabase:
