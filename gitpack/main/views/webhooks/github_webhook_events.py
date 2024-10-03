@@ -5,6 +5,8 @@ from main.lib.openai import OpenAIHelper
 import logging
 import github
 import json
+from main.models import Repository, Organization
+
 github_app = GithubApp()
 
 # Handle pull request opened
@@ -75,4 +77,117 @@ def handle_pull_request_opened(request, payload):
     review = pull_request.create_review(commit=latest_commit, body=overall_feedback, comments=comments)
 
     return JsonResponse({'status': f"Handled pull_request.opened: {pr_number}"}, status=200)
+
+
+@github_app.on(event_type='installation_repositories', actions=('added', 'removed'))
+def handle_installation_repositories(request, payload):
+    """
+    Handle the 'installation_repositories' event when the GitHub App is installed on new repositories.
+    """
+    action = payload.get('action')
+    installation = payload.get('installation')
+    
+    if action == 'added':
+        repositories_added = payload.get('repositories_added', [])
+        for repo in repositories_added:
+            repo_name = repo.get('full_name')
+            repo_id = repo.get('id')
+            
+            # Log the new installation
+            logging.info(f"GitHub App installed on new repository: {repo_name} (ID: {repo_id})")
+
+            # get or create organization
+            organization, created = Organization.objects.update_or_create(
+                third_party_id=installation.get('id'),
+                defaults={
+                    'name': installation.get('account').get('login'),
+                    'url': installation.get('account').get('html_url'),
+                    'avatar_url': installation.get('account').get('avatar_url')
+                }
+            )
+            
+            # Create a new repository object
+            repository, created = Repository.objects.update_or_create(
+                third_party_id=repo.get('id'),
+                defaults={
+                    'name': repo.get('name'),
+                    'full_name': repo_name,
+                    'description': repo.get('description', ''),
+                    'url': 'https://github.com/' + repo_name,
+                    'private': repo.get('private', False),
+                    'organization': organization
+                }
+            )
+            if created:
+                logging.info(f"Created new repository: {repo_name}")
+            else:
+                logging.info(f"Updated existing repository: {repo_name}")
+        
+        return JsonResponse({'status': 'Handled installation_repositories event'}, status=200)
+    
+    if action == 'removed':
+        repositories_removed = payload.get('repositories_removed', [])
+        for repo in repositories_removed:
+            repo_name = repo.get('full_name')
+            repo_id = repo.get('id')
+            logging.info(f"GitHub App removed from repository: {repo_name} (ID: {repo_id})")
+            repository = Repository.objects.get(full_name=repo_name)
+            repository.delete()
+    
+    return JsonResponse({'status': 'Unhandled action for installation_repositories event'}, status=200)
+
+
+@github_app.on(event_type='installation', actions=('created', 'deleted'))
+def handle_installation_created(request, payload):
+    """
+    Handle the 'installation' event when a new installation is created.
+    """
+    installation = payload.get('installation')
+    installation_id = installation.get('id')
+    action = payload.get('action')
+    repositories = payload.get('repositories', [])
+    
+    if action == 'created':
+        for repo in repositories:
+            repo_name = repo.get('full_name')
+            repo_id = repo.get('id')
+            logging.info(f"GitHub App installation created: {repo_name} (ID: {repo_id})")
+
+            # get or create organization
+            organization, created = Organization.objects.update_or_create(
+                third_party_id=installation.get('id'),
+                defaults={
+                    'name': installation.get('account').get('login'),
+                    'url': installation.get('account').get('html_url'),
+                    'avatar_url': installation.get('account').get('avatar_url')
+                }
+            )
+            # Create a new repository object
+            repository, created = Repository.objects.update_or_create(
+                third_party_id=repo.get('id'),
+                defaults={
+                    'name': repo.get('name'),
+                    'full_name': repo_name,
+                    'description': repo.get('description', ''),
+                    'url': 'https://github.com/' + repo_name,
+                    'private': repo.get('private', False),
+                    'organization': organization
+                }
+            )
+            if created:
+                logging.info(f"Created new repository: {repo_name}")
+            else:
+                logging.info(f"Updated existing repository: {repo_name}")
+        
+        return JsonResponse({'status': 'Handled installation event'}, status=200)
+
+    if action == 'deleted':
+        for repo in repositories:
+            repo_name = repo.get('full_name')
+            repo_id = repo.get('id')
+            logging.info(f"GitHub App installation deleted: {repo_name} (ID: {repo_id})")
+            repository = Repository.objects.get(full_name=repo_name)
+            repository.delete()
+    
+    return JsonResponse({'status': 'Unhandled action for installation event'}, status=200)
 
