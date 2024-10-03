@@ -1,5 +1,13 @@
-django==5.1.1
+django==5.1
 requests==2.32.3
 openai==1.47.1
 PyGithub==2.4.0
-colorlog
+colorlog==6.8.2
+djangorestframework==3.15.2
+dj-rest-auth==6.0.0
+django-allauth==0.61.1
+django-cors-headers==4.4.0
+gunicorn==23.0.0
+psycopg2-binary==2.9.9
+drf_yasg==1.21.7
+setuptools==75.1.0
