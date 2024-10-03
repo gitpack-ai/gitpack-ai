@@ -12,7 +12,7 @@ services:
     
   web:
     build: .
-    command: gunicorn --bind 0.0.0.0:8000 gitpack.wsgi:application
+    command: gunicorn --bind 0.0.0.0:8000 --chdir /code/gitpack gitpack.wsgi:application
     volumes:
       - .:/code
     ports:
