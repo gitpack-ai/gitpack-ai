@@ -1,10 +1,10 @@
 import React, { createContext, useContext } from 'react';
-import { useAuth } from '../lib/useAuth';
+import { useAuth, User } from '../lib/useAuth';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
-// Create a context for the user
-export const UserContext = createContext<any>(null);
+
+export const UserContext = createContext<User | null>(null);
 
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoggedIn, isLoading } = useAuth();

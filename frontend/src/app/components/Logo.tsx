@@ -1,5 +1,5 @@
 
-const LogoComponent = (props: any) => {
+const LogoComponent = (props: { className?: string }) => {
     return (
         <svg className={props.className ? props.className : ''} height={32} viewBox='0 0 1100 300'>
             <defs>

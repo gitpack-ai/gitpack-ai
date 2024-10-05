@@ -1,8 +1,8 @@
-
+import { getCookie } from 'cookies-next';
 
 export class FetchError extends Error {
     response: Response
-    data: any
+    data: object
     constructor({
       message,
       response,
@@ -10,7 +10,7 @@ export class FetchError extends Error {
     }: {
       message: string
       response: Response
-      data: any
+      data: object
     }) {
       // Pass remaining arguments (including vendor specific ones) to parent constructor
       super(message)
@@ -31,20 +31,21 @@ export default async function fetchJson<JSON = unknown>(
   init?: RequestInit
 ): Promise<JSON> {
     const auth_token = localStorage.getItem('authToken');
-    let updatedInit = {
+    const updatedInit = {
       ...init,
-      credentials: 'include',
       headers: {
-        ...init?.headers,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        ...(getCookie('csrftoken') && { 'X-CSRFToken': getCookie('csrftoken') }),
       },
     };
-    if(auth_token !== '' && auth_token !== undefined && auth_token !== null){
-      // @ts-ignore
-      updatedInit.headers.Authorization = `Token ${auth_token}`;
+    if (auth_token && auth_token !== '') {
+      (updatedInit.headers as Record<string, string>)['Authorization'] = `Token ${auth_token}`;
     }
-    // @ts-ignore
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}${input}`, updatedInit);
+ 
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}${input}`, {
+      ...updatedInit,
+      credentials: 'include' as RequestCredentials,
+    });
     // if the server replies, there's always some data in json
     // if there's a network error, it will throw at the previous line
     const data = await response.json()

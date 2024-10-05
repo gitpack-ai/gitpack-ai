@@ -5,20 +5,26 @@ import { useRouter } from 'next/navigation'; // Changed from 'next/router'
 import { useAuth } from '../lib/useAuth';
 import { ProtectedRoute, useUser } from '../components/ProtectedRoute';
 import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
-import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import fetchJson, {FetchError} from '../lib/fetchJson';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/solid';
 
-const GITHUB_APP_HANDLE = process.env.NEXT_PUBLIC_GITHUB_APP_HANDLE;
+interface Repository {
+  // Define the structure of a repository object
+  url: string;
+  full_name: string;
+  description: string;
+  private: boolean;
+}
 
 const navigation = [
   { name: 'Dashboard', href: '#', current: true },
 ]
-const userNavigation = [
-  { name: 'Sign out', href: '#' },
-]
+// const userNavigation = [
+//   { name: 'Sign out', href: '#' },
+// ]
 
-function classNames(...classes) {
+function classNames(...classes: string[]): string {
   return classes.filter(Boolean).join(' ')
 }
 
@@ -26,7 +32,7 @@ export default function Dashboard() {
     const auth = useAuth();
     const user = useUser();
     const router = useRouter();
-    const [repos, setRepos] = useState([]);
+    const [repos, setRepos] = useState<Repository[]>([]);
 
     useEffect(() => {
         getGithubRepos();
@@ -39,7 +45,7 @@ export default function Dashboard() {
 
     const getGithubRepos = async () => {
         try {
-            const repositories = await fetchJson('/api/github/repos?is_app_installed=1');
+            const repositories = await fetchJson<Repository[]>('/api/github/repos?is_app_installed=1');
             setRepos(repositories);
         } catch (error) {
             if (error instanceof FetchError) {
@@ -59,11 +65,7 @@ export default function Dashboard() {
             <div className="flex h-16 items-center justify-between">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
-                  <img
-                    alt="Your Company"
-                    src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=500"
-                    className="h-8 w-8"
-                  />
+                  
                 </div>
                 <div className="hidden md:block">
                   <div className="ml-10 flex items-baseline space-x-4">
@@ -189,6 +191,14 @@ export default function Dashboard() {
         <main>
             <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
                 <ul role="list" className="divide-y divide-gray-100">
+                    <li className="flex justify-between gap-x-6 py-3 px-5 mb-5 border-b border-gray-200 text-blue-700">
+                        <div className="flex min-w-0 gap-x-4">
+                            <h4 className='text-sm font-semibold'>Repository</h4>
+                        </div>
+                        <div className="flex items-center mr-3">
+                            <h4 className='text-sm font-semibold'>Status</h4>
+                        </div>
+                    </li>
                 {repos.map((repo) => (
                     <li key={repo.url} className="flex justify-between gap-x-6 py-5 px-5 mb-3 rounded-lg border border-gray-200 hover:cursor-pointer hover:bg-gray-100">
                         <div className="flex min-w-0 gap-x-4">
@@ -197,7 +207,7 @@ export default function Dashboard() {
                                 <p className="mt-1 truncate text-xs leading-5 text-gray-500">{repo.description}</p>
                             </div>
                         </div>
-                        <div className="flex items-center">
+                        <div className="flex items-center mr-5">
                             {!repo.private ? (
                                 <div className="flex items-center">
                                     <CheckCircleIcon className="h-6 w-6 text-green-500" aria-hidden="true" />

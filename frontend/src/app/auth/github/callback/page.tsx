@@ -1,30 +1,39 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
 import { useAuth } from '../../../lib/useAuth';
 
-const GitHubCallback = () => {
+const GitHubCallbackContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const auth = useAuth();
 
   useEffect(() => {
+    const exchangeCodeForToken = async (code: string) => {
+      const status = await auth.loginWithGitHub(code);
+      if (status) {
+        router.push('/dashboard');
+      }
+    };
+
     const code = searchParams.get('code');
 
     if (code) {
       exchangeCodeForToken(code);
     }
-  }, [searchParams]);
-
-  const exchangeCodeForToken = async (code: string) => {
-    const status = await auth.loginWithGitHub(code);
-    if(status)
-      router.push('/dashboard')
-  };
+  }, [searchParams, auth, router]);
 
   return <div>Processing GitHub login...</div>;
+};
+
+const GitHubCallback = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <GitHubCallbackContent />
+    </Suspense>
+  );
 };
 
 export default GitHubCallback;

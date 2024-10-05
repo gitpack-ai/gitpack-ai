@@ -1,8 +1,14 @@
 databases:
-  - name: gitpackdb
-    plan: free
-    databaseName: gitpack
-    user: gitpack
+- name: gitpackdb
+  databaseName: gitpack
+  user: gitpack
+  plan: free
+  region: oregon
+  ipAllowList:
+  - source: 0.0.0.0/0
+    description: everywhere
+  postgresMajorVersion: "16"
+version: "1"
 
 services:
   - type: web

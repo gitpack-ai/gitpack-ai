@@ -1,7 +1,7 @@
 'use client';
 
 import Image from "next/image";
-import { ProtectedRoute, useUser } from "./components/ProtectedRoute";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 export default function Home() {
   return (

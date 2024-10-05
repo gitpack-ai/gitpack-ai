@@ -1,19 +1,12 @@
 "use client"
 
-import React, { useState, useEffect } from 'react'
-import { useAuth } from "../providers/auth";
-import fetchJson, { FetchError } from '../lib/fetchJson';
+import React, { Suspense } from 'react'
 import LogoComponent from '../components/Logo';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { useRouter } from 'next/navigation';
 
-
-export default function Login() {
+function LoginContent() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  //const auth = useAuth();
-  const [errorMsg, setErrorMsg] = useState('');
-  const router = useRouter();
 
   const handleGitHubLogin = () => {
     // Replace with your actual Django backend URL
@@ -24,8 +17,7 @@ export default function Login() {
     window.location.href = githubLoginUrl;
   };
 
-
-  useEffect(() => {
+  React.useEffect(() => {
 
   }, [pathname, searchParams])
 
@@ -54,4 +46,11 @@ export default function Login() {
     </>
   )
 }
-  
+
+export default function Login() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginContent />
+    </Suspense>
+  )
+}
