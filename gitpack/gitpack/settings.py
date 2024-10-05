@@ -34,7 +34,10 @@ else:
 
 
 ALLOWED_HOSTS = ['*']
-FRONTEND_HOST = 'http://localhost:3000'
+if ENVIRONMENT == 'development':
+    FRONTEND_HOST = 'http://localhost:3000'
+else:
+    FRONTEND_HOST = 'https://gitpack.co'
 
 
 # Application definition
@@ -267,6 +270,7 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://gitpack.co",
 ]
 
 # Add this REST_FRAMEWORK configuration
