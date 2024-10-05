@@ -9,9 +9,7 @@ function LoginContent() {
   const searchParams = useSearchParams()
 
   const handleGitHubLogin = () => {
-    // Replace with your actual Django backend URL
-    const backendUrl = 'http://localhost:8000';
-    const githubLoginUrl = `${backendUrl}/auth/github/redirect/`;
+    const githubLoginUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/github/redirect/`;
     
     // Redirect to the GitHub login URL
     window.location.href = githubLoginUrl;
