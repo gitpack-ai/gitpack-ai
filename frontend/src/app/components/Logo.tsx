@@ -1,65 +1,140 @@
-
-const LogoComponent = (props: { className?: string }) => {
+const LogoComponent = (props: { className?: string, isLight: boolean }) => {
     return (
-        <svg className={props.className ? props.className : ''} height={32} viewBox='0 0 1100 300'>
+    <>
+        {props.isLight ? (
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            xmlnsXlink="http://www.w3.org/1999/xlink"
+            width={1}
+            viewBox="0 0 64 64"
+            {...props}
+        >
             <defs>
-            <path id="a" d="M1100 0v300H0V0h1100Z" />
-            <path id="b" d="M256 0v256H0V0h256Z" />
-            <path id="c" d="M189.5 60.5 128 0a128 128 0 1 0 128 128l-66.5-67.5Z" />
-            <path
+            <linearGradient id="a">
+                <stop
+                offset={0}
+                style={{
+                    stopColor: "#fcfcfc",
+                }}
+                />
+                <stop
+                offset={1}
+                style={{
+                    stopColor: "rgba(215,215,215,.9)",
+                }}
+                />
+            </linearGradient>
+            <linearGradient
+                xlinkHref="#a"
+                id="b"
+                x1={54.5}
+                x2={54.5}
+                y1={35.914}
+                y2={49}
+                gradientUnits="userSpaceOnUse"
+            />
+            <linearGradient
+                xlinkHref="#a"
+                id="c"
+                x1={9.5}
+                x2={9.5}
+                y1={35.914}
+                y2={49}
+                gradientUnits="userSpaceOnUse"
+            />
+            <linearGradient
+                xlinkHref="#a"
                 id="d"
-                d="m181.844 74.028-39.621-40.18a97 97 0 1 0 81.403 80.011l-41.782-39.83Z"
+                x1={32}
+                x2={32}
+                y1={19}
+                y2={49}
+                gradientUnits="userSpaceOnUse"
+            />
+            <linearGradient
+                xlinkHref="#a"
+                id="e"
+                x1={22}
+                x2={22}
+                y1={11}
+                y2={53}
+                gradientUnits="userSpaceOnUse"
+            />
+            <linearGradient
+                xlinkHref="#a"
+                id="f"
+                x1={42}
+                x2={42}
+                y1={11}
+                y2={53}
+                gradientUnits="userSpaceOnUse"
+            />
+            </defs>
+            <g>
+            <path
+                d="M49 35.914V49h11v-3.001L49 35.914z"
+                style={{
+                paintOrder: "stroke",
+                fill: "url(#b)",
+                }}
+                transform="matrix(.85714 0 0 .84573 5.028 5.615)"
             />
             <path
-                id="j"
-                d="M236.133 137.899a124.906 124.906 0 0 1-19.007-2.229c-23.889-4.679-45.833-16.228-63.056-33.187-17.223-16.96-28.952-38.566-33.704-62.089a119.561 119.561 0 0 1-2.274-28.337c1.25-.038 2.503-.057 3.756-.057l.215.207 5.56 5.387 53.396 51.722 59.239 59.208 4.498 4.495.244.244c0 1.563-.031 3.123-.092 4.681a125.187 125.187 0 0 1-8.775-.045Z"
+                d="M15 35.914 4 45.999V49h11V35.914z"
+                style={{
+                paintOrder: "stroke",
+                fill: "url(#c)",
+                }}
+                transform="matrix(.85714 0 0 .84573 5.028 5.615)"
             />
-            <path id="e" d="M700 0v300H0V0h700Z" />
-            <clipPath id="f">
-                <use xlinkHref="#a" />
-            </clipPath>
-            <clipPath id="g">
-                <use xlinkHref="#b" />
-            </clipPath>
-            <clipPath id="h">
-                <use xlinkHref="#c" />
-            </clipPath>
-            <clipPath id="i">
-                <use xlinkHref="#d" />
-            </clipPath>
-            <clipPath id="k">
-                <use xlinkHref="#e" />
-            </clipPath>
+            <path
+                d="M32 19c-1.162 0-2.295.095-3.377.269l.003.018c.248 1.495.374 3.054.374 4.633V49h6V23.92c0-1.572.126-3.128.374-4.624l.004-.022A20.842 20.842 0 0 0 32 19Z"
+                style={{
+                paintOrder: "stroke",
+                fill: "url(#d)",
+                }}
+                transform="matrix(.85714 0 0 .84573 5.028 5.615)"
+            />
+            <path
+                d="M27.64 19.45h-.01C26.79 14.51 24.59 11 22 11c-3.32 0-6 5.78-6 12.92V53h3.5v-9.9c0-.17.224-.308.5-.308s.5.138.5.308V53H28V23.92c0-1.57-.13-3.08-.36-4.47z"
+                style={{
+                paintOrder: "stroke",
+                fill: "url(#e)",
+                }}
+                transform="matrix(.85714 0 0 .84573 5.028 5.615)"
+            />
+            <path
+                d="M42 11c-2.59 0-4.79 3.52-5.64 8.46-.23 1.39-.36 2.89-.36 4.46V53h7.5v-9.9c0-.17.224-.308.5-.308s.5.138.5.308V53H48V23.92C48 16.78 45.32 11 42 11z"
+                style={{
+                paintOrder: "stroke",
+                fill: "url(#f)",
+                }}
+                transform="matrix(.85714 0 0 .84573 5.028 5.615)"
+            />
+            </g>
+        </svg>) : (
+            <svg className={props.className} version="1.1" x="0" y="0" viewBox="0 0 64 64" enableBackground="new 0 0 64 64" width="1px" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink">
+            <defs>
+                <linearGradient id="gradient-5">
+                    <stop offset="0" stopColor="rgb(126, 126, 218)" />
+                    <stop offset="1" stopColor="rgb(22, 28, 117)" />
+                </linearGradient>
+                <linearGradient id="gradient-5-0" gradientUnits="userSpaceOnUse" x1="54.5" y1="35.914" x2="54.5" y2="49" xlinkHref="#gradient-5" />
+                <linearGradient id="gradient-5-1" gradientUnits="userSpaceOnUse" x1="9.5" y1="35.914" x2="9.5" y2="49" xlinkHref="#gradient-5" />
+                <linearGradient id="gradient-5-2" gradientUnits="userSpaceOnUse" x1="32" y1="19" x2="32" y2="49" xlinkHref="#gradient-5" />
+                <linearGradient id="gradient-5-3" gradientUnits="userSpaceOnUse" x1="22" y1="11" x2="22" y2="53" xlinkHref="#gradient-5" />
+                <linearGradient id="gradient-5-4" gradientUnits="userSpaceOnUse" x1="42" y1="11" x2="42" y2="53" xlinkHref="#gradient-5" />
             </defs>
-            <g clipPath="url(#f)">
-            <path fill="none" d="M1100 0v300H0V0h1100Z" />
-            <g clipPath="url(#g)" transform="translate(0 23)">
-                <path fill="none" d="M256 0v256H0V0h256Z" />
-                <use xlinkHref="#c" fill="#EA5455" fillRule="evenodd" />
-                <g clipPath="url(#h)">
-                <use xlinkHref="#c" fill="none" stroke="#EA5455" strokeWidth={20} />
-                </g>
-                <g clipPath="url(#i)">
-                <use
-                    xlinkHref="#d"
-                    fill="none"
-                    stroke="#FFF"
-                    strokeDasharray="10 10"
-                    strokeWidth={20}
-                />
-                </g>
-                <use xlinkHref="#j" fill="none" stroke="#EA5455" strokeWidth={20} />
-                <use xlinkHref="#j" fill="#FFF" fillRule="evenodd" />
-            </g>
-            <g clipPath="url(#k)" transform="translate(329 1)">
-                <path fill="none" d="M700 0v300H0V0h700Z" />
-                <path
-                fill="#EA5455"
-                d="m11.252 209.284 3.944-23.2q1.74 1.392 7.366 3.77 5.626 2.378 13.456 4.292 7.83 1.914 16.182 1.914 10.788.116 16.008-3.19 5.22-3.306 5.22-9.454 0-4.408-3.364-7.656-3.364-3.248-9.164-6.09-5.8-2.842-13.108-5.858Q35.96 158.94 27.84 153.14q-8.12-5.8-12.238-13.398T11.6 121.82q.116-11.832 6.902-19.72 6.786-7.888 18.038-11.774 11.252-3.886 24.94-3.886 13.572 0 23.316 2.61t13.108 4.582l-3.828 23.664q-2.204-1.856-6.786-3.77-4.582-1.914-10.498-3.19-5.916-1.276-11.948-1.276-11.368 0-16.82 2.958t-5.568 8.41q-.116 7.308 5.394 10.788 5.51 3.48 14.558 7.54 13.224 5.684 22.736 11.31t14.616 12.876q5.104 7.25 5.104 17.69 0 18.908-13.34 28.71t-36.076 9.802q-9.628 0-18.502-1.508-8.874-1.508-15.602-3.77t-10.092-4.582Zm165.08 9.86q-11.02 0-18.502-3.538-7.482-3.538-11.252-11.658-3.77-8.12-3.77-21.924V110.8H126.8V93.4q8.584-2.436 13.514-4.466 4.93-2.03 7.134-7.482 1.044-2.668 2.378-6.264t2.784-7.83q1.45-4.234 3.074-8.758h19.604v29.464h35.148V110.8h-35.148v56.608q0 12.296 1.16 17.98 1.16 5.684 4.35 7.25 3.19 1.566 8.99 1.566 3.132 0 7.192-.754 4.06-.754 7.714-1.914 3.654-1.16 5.742-2.436l4.64 18.212q-3.364 2.9-9.454 5.568-6.09 2.668-13.746 4.466-7.656 1.798-15.544 1.798Zm69.032-1.856V88.18h32.48v129.108h-32.48Zm14.5-149.176q-8.004 0-13.63-4.93-5.626-4.93-5.626-13.166 0-5.568 3.074-10.15 3.074-4.582 8.004-7.366t10.498-2.784q9.048 0 14.036 5.162 4.988 5.162 4.988 13.05 0 8.584-6.38 14.384-6.38 5.8-14.964 5.8Zm99.308 151.032q-11.02 0-18.502-3.538-7.482-3.538-11.252-11.658-3.77-8.12-3.77-21.924V110.8H309.64V93.4q8.584-2.436 13.514-4.466 4.93-2.03 7.134-7.482 1.044-2.668 2.378-6.264t2.784-7.83q1.45-4.234 3.074-8.758h19.604v29.464h35.148V110.8h-35.148v56.608q0 12.296 1.16 17.98 1.16 5.684 4.35 7.25 3.19 1.566 8.99 1.566 3.132 0 7.192-.754 4.06-.754 7.714-1.914 3.654-1.16 5.742-2.436l4.64 18.212q-3.364 2.9-9.454 5.568-6.09 2.668-13.746 4.466-7.656 1.798-15.544 1.798Zm58.244-65.076q0-19.024 6.96-34.336 6.96-15.312 21.112-24.302 14.152-8.99 35.728-8.99 12.528 0 21.46 2.088t12.064 4.292l-4.408 25.056q-4.408-2.784-10.962-4.466-6.554-1.682-16.182-1.682-7.888 0-15.428 3.712-7.54 3.712-12.586 12.122t-5.51 22.562q-.348 14.964 4.06 24.766 4.408 9.802 12.064 14.558t17.052 4.756q9.164 0 16.878-2.03t11.89-4.35l5.22 19.72q-5.684 5.568-16.762 8.584t-23.374 3.016q-19.488 0-32.654-8.584-13.166-8.584-19.894-23.258-6.728-14.674-6.728-33.234Zm129.352 63.22v-188.5h32.48v51.388l-1.74 25.404-1.16-3.132q4.408-3.712 11.31-7.424t15.138-6.148q8.236-2.436 16.588-2.668 21.112-.58 30.856 11.658 9.744 12.238 9.744 39.73v79.692h-32.596v-77.14q0-15.544-4.582-21.75-4.582-6.206-16.53-5.742-5.336.116-12.934 2.494-7.598 2.378-14.094 7.714v94.424h-32.48Z"
-                />
-            </g>
+            <g transform="matrix(0.857143, 0, 0, 0.845732, 5.028159, 5.614667)">
+                <path d="M49,35.914V49h11c0,0,0-1,0-3.001L49,35.914z" style={{paintOrder: "stroke", fill: "url(#gradient-5-0)"}} />
+                <path d="M15,35.914L4,45.999C4,48,4,49,4,49h11V35.914z" style={{paintOrder: "stroke", fill: "url(#gradient-5-1)"}} />
+                <path d="M 32 19 C 30.838 19 29.705 19.095 28.623 19.269 L 28.626 19.287 C 28.874 20.782 29 22.341 29 23.92 L 29 49 L 35 49 L 35 23.92 C 35 22.348 35.126 20.792 35.374 19.296 C 35.375 19.288 35.377 19.281 35.378 19.274 C 34.296 19.096 33.163 19 32 19 Z" style={{paintOrder: "stroke", fill: "url(#gradient-5-2)"}} />
+                <path d="M27.64,19.45h-0.01C26.79,14.51,24.59,11,22,11c-3.32,0-6,5.78-6,12.92V53h3.5v-9.9c0-0.17,0.224-0.308,0.5-0.308   s0.5,0.138,0.5,0.308V53H28V23.92C28,22.35,27.87,20.84,27.64,19.45z" style={{paintOrder: "stroke", fill: "url(#gradient-5-3)"}} />
+                <path d="M42,11c-2.59,0-4.79,3.52-5.64,8.46C36.13,20.85,36,22.35,36,23.92V53h7.5v-9.9c0-0.17,0.224-0.308,0.5-0.308   s0.5,0.138,0.5,0.308V53H48V23.92C48,16.78,45.32,11,42,11z" style={{paintOrder: "stroke", fill: "url(#gradient-5-4)"}} />
             </g>
         </svg>
+        )}
+    </>
     );
 }
 
