@@ -1,33 +1,54 @@
 # GitPack AI
-An AI Bot that acts as a first reviewer for your pull requests
 
-## Installation
+#### Automate Pull Request Reviews with AI 🪄
+Get Faster, Smarter Code Reviews on Any GitHub Repo!
 
-```bash
-pip install -r requirements.txt
-```
+[https://gitpack.co](https://gitpack.co)
 
+
+
+## Prerequisites
+
+- Docker
+- Docker Compose
+- OpenAI API Key
+- Github App
+
+## Installation and Setup
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-repo/gitpack-ai.git
+   cd gitpack-ai
+   ```
+
+2. Create a `gitpack/.env` file and add the following environment variables:
+   ```
+   GITHUBAPP_ID=<your_github_app_id>
+   GITHUBAPP_KEY=<your_github_app_private_key>
+   GITHUB_WEBHOOK_SECRET=<your_github_webhook_secret>
+   GITPACK_OPENAI_ORGANIZATION=<your_openai_organization>
+   GITPACK_OPENAI_PROJECT=<your_openai_project>
+   GITPACK_OPENAI_API_KEY=<your_openai_api_key>
+   ```
+
+3. Create a `frontend/.env.local` file and add the following:
+   ```
+   NEXT_PUBLIC_BACKEND_URL=http://localhost:8000
+   NEXT_PUBLIC_GITHUB_APP_HANDLE=<name-of-your-github-app>
+   ```
 
 ## Running the app
 
-1. Set up environment variables:
+1. Start the application using Docker Compose:
    ```bash
-   export GITHUBAPP_ID=<your_github_app_id>
-   export GITHUBAPP_KEY=<your_github_app_private_key>
-   export GITHUB_WEBHOOK_SECRET=<your_github_webhook_secret>
-   export GITPACK_OPENAI_ORGANIZATION=<your_openai_organization>
-   export GITPACK_OPENAI_PROJECT=<your_openai_project>
-   export GITPACK_OPENAI_API_KEY=<your_openai_api_key>
+   docker-compose up --build
    ```
 
-2. Run the Django development server:
-   ```bash
-   python manage.py runserver
-   ```
-
-3. The app should now be running at `http://localhost:8000`
-
-
+2. The services will be available at:
+   - Backend: `http://localhost:8000`
+   - Frontend: `http://localhost:3000`
+   - Database: `localhost:5435`
 
 ## Create a Github App
 To create a GitHub App for Gitpack AI, follow these steps:
@@ -61,7 +82,7 @@ To create a GitHub App for Gitpack AI, follow these steps:
    ```
 3. Save this secret in your app settings and in your environment variables.
 
-Remember to update your environment variables with the new GitHub App details:
+Remember to update your environment variables with the new GitHub App details.
 
 ## Usage
 
@@ -77,11 +98,9 @@ To use the Gitpack AI bot for automatic PR reviews, follow these steps:
    - Find "Gitpack AI" (or the name you chose) in the list
    - Click "Install"
 
-
 3. When a new pull request is opened or updated in your repository, the bot will automatically:
    - Analyze the changes in the pull request
    - Generate an overall review of the changes
    - Provide line-specific comments and suggestions
 
 The bot automatically triggers on new PRs or updates to existing PRs. There's no need for manual intervention to initiate a review.
-

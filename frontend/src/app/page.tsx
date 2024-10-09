@@ -1,9 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation'; // Changed from 'next/router'
-import { useAuth } from './lib/useAuth';
-import { ProtectedRoute, useUser } from './components/ProtectedRoute';
+import { ProtectedRoute } from './components/ProtectedRoute';
 import fetchJson, {FetchError} from './lib/fetchJson';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/solid';
 
@@ -16,9 +14,6 @@ interface Repository {
 }
 
 export default function Home() {
-    const auth = useAuth();
-    const user = useUser();
-    const router = useRouter();
     const [repos, setRepos] = useState<Repository[]>([]);
 
     useEffect(() => {

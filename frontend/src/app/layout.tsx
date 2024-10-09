@@ -19,19 +19,6 @@ export const metadata: Metadata = {
   description: "Automate Pull Request Reviews with AI",
 };
 
-const navigation = [
-  { name: 'Dashboard', href: '/dashboard', current: true },
-  { name: 'Pricing', href: '/pricing', current: false },
-]
-const userNavigation = [
-  { name: 'Manage Billing', href: '/pricing' },
-  { name: 'Sign out', href: '#signout' },
-]
-
-function classNames(...classes: string[]): string {
-  return classes.filter(Boolean).join(' ')
-}
-
 export default function RootLayout({
   children,
 }: Readonly<{
