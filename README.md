@@ -10,7 +10,6 @@ Get Faster, Smarter Code Reviews on Any GitHub Repo!
 ## Prerequisites
 
 - Docker
-- Docker Compose
 - OpenAI API Key
 - Github App
 

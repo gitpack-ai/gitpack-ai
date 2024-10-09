@@ -14,7 +14,7 @@ services:
     build:
       context: ./gitpack
       dockerfile: Dockerfile
-    command: gunicorn --bind 0.0.0.0:8000 gitpack.wsgi:application
+    command: gunicorn --bind 0.0.0.0:8000 --chdir /code gitpack.wsgi:application
     volumes:
       - ./gitpack:/code
     ports:
