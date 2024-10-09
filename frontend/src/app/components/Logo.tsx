@@ -1,7 +1,7 @@
-const LogoComponent = (props: { className?: string, isLight: boolean }) => {
+const LogoComponent = (props: { light: string, className?: string }) => {
     return (
     <>
-        {props.isLight ? (
+        {props.light === "true" ? (
         <svg
             xmlns="http://www.w3.org/2000/svg"
             xmlnsXlink="http://www.w3.org/1999/xlink"

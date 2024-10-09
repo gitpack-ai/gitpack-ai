@@ -6,6 +6,15 @@ class UserProfile(models.Model):
 
     user = models.OneToOneField(User, related_name='profile',
         primary_key=True, on_delete=models.CASCADE)
+    
+
+class Pricing(models.Model):
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    third_party_id = models.IntegerField(unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 
 class Organization(models.Model):
@@ -14,6 +23,7 @@ class Organization(models.Model):
     url = models.URLField()
     avatar_url = models.URLField()
     third_party_id = models.IntegerField(unique=True)
+    pricing = models.ForeignKey(Pricing, related_name='organizations', on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

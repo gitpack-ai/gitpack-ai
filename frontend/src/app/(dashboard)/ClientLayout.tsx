@@ -1,16 +1,16 @@
 'use client';
 
-import { useAuth } from './lib/useAuth';
-import { useUser } from './components/ProtectedRoute';
-import { useRouter } from 'next/navigation';
+import { useAuth } from '../lib/useAuth';
+import { useUser } from '../components/ProtectedRoute';
+import { useRouter, usePathname } from 'next/navigation';
 import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
-import LogoComponent from './components/Logo';
+import LogoComponent from '../components/Logo';
 
 
 const navigation = [
-  { name: 'Dashboard', href: '/dashboard', current: true },
-  { name: 'Pricing', href: '/pricing', current: false },
+  { name: 'Repositories', href: '/repositories' },
+  { name: 'Pricing', href: '/pricing' },
 ]
 const userNavigation = [
   { name: 'Manage Billing', href: '/pricing' },
@@ -29,6 +29,7 @@ export default function ClientLayout({
   const auth = useAuth();
   const user = useUser();
   const router = useRouter();
+  const pathname = usePathname();
 
   const signout = () => {
     auth.logout();
@@ -42,7 +43,9 @@ export default function ClientLayout({
             <div className="flex h-16 items-center justify-between">
                 <div className="flex items-center">
                 <div className="flex-shrink-0">
-                    <LogoComponent isLight={true} className="h-10 w-10 text-white" />
+                    <a href='/repositories'>
+                        <LogoComponent light={true} className="h-10 w-10 text-white" />
+                    </a>
                 </div>
                 <div className="hidden md:block">
                     <div className="ml-10 flex items-baseline space-x-4">
@@ -50,9 +53,9 @@ export default function ClientLayout({
                         <a
                         key={item.name}
                         href={item.href}
-                        aria-current={item.current ? 'page' : undefined}
+                        aria-current={pathname === item.href ? 'page' : undefined}
                         className={classNames(
-                            item.current ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
+                             item.href === pathname ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
                             'rounded-md px-3 py-2 text-sm font-medium',
                         )}
                         >

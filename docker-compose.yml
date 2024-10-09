@@ -24,18 +24,18 @@ services:
     depends_on:
       - db
 
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    volumes:
-      - ./frontend:/app
-    ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=development
-    env_file:
-      - ./frontend/.env.local
-    command: npm run dev
-    depends_on:
-      - web
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #     - ./frontend:/app
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - NODE_ENV=development
+  #   env_file:
+  #     - ./frontend/.env.local
+  #   command: npm run dev
+  #   depends_on:
+  #     - web

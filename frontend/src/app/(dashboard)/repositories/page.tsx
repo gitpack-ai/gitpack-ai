@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ProtectedRoute } from './components/ProtectedRoute';
-import fetchJson, {FetchError} from './lib/fetchJson';
+import { ProtectedRoute } from '../../components/ProtectedRoute';
+import fetchJson, {FetchError} from '../../lib/fetchJson';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/solid';
 
 interface Repository {
@@ -11,9 +11,17 @@ interface Repository {
   full_name: string;
   description: string;
   private: boolean;
+  organization: {
+    login: string;
+    name: string;
+    description: string;
+    url: string;
+    avatar_url: string;
+    is_paid: boolean;
+  }
 }
 
-export default function Home() {
+export default function Repositories() {
     const [repos, setRepos] = useState<Repository[]>([]);
 
     useEffect(() => {
