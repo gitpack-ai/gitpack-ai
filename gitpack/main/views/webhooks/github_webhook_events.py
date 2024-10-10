@@ -20,6 +20,10 @@ def handle_pull_request_opened(request, payload):
     gc = github_app.get_github_client(payload)
     # Get the repository object
     repo = gc.get_repo(repo_full_name)
+    repository = Repository.objects.get(third_party_id=repo.id)
+    if not repository.is_enabled:
+        logging.info(f"Pull request opened for disabled repository: {repo_full_name} (ID: {repo.id})")
+        return JsonResponse({'status': f"Handled pull_request.opened: {pr_number}"}, status=200)
 
     # Get the PullRequest object
     pull_request = repo.get_pull(pr_number)
@@ -159,7 +163,7 @@ def handle_installation_created(request, payload):
                 defaults={
                     'name': installation.get('account').get('login'),
                     'url': installation.get('account').get('html_url'),
-                    'avatar_url': installation.get('account').get('avatar_url')
+                    'avatar_url': installation.get('account').get('avatar_url'),
                 }
             )
             # Create a new repository object

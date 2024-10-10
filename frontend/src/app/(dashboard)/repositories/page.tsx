@@ -4,14 +4,17 @@ import { useEffect, useState } from 'react';
 import { ProtectedRoute } from '../../components/ProtectedRoute';
 import fetchJson, {FetchError} from '../../lib/fetchJson';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/solid';
-
+import Toggle from '../../components/Toggle';
 interface Repository {
   // Define the structure of a repository object
+  id: number;
   url: string;
   full_name: string;
   description: string;
   private: boolean;
+  is_enabled: boolean;
   organization: {
+    id: number;
     login: string;
     name: string;
     description: string;
@@ -23,6 +26,7 @@ interface Repository {
 
 export default function Repositories() {
     const [repos, setRepos] = useState<Repository[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         getGithubRepos();
@@ -32,6 +36,7 @@ export default function Repositories() {
         try {
             const repositories = await fetchJson<Repository[]>('/api/github/repos?is_app_installed=1');
             setRepos(repositories);
+            setIsLoading(false);
         } catch (error) {
             if (error instanceof FetchError) {
                 console.error('Error fetching GitHub repositories:', error.data);
@@ -73,6 +78,15 @@ export default function Repositories() {
                             <h4 className='text-sm font-semibold'>Status</h4>
                         </div>
                     </li>
+                {isLoading ? (
+                    <li className="flex justify-center py-5 px-5 mb-3 rounded-lg border border-gray-200">
+                        <p className="text-sm text-gray-500">Loading...</p>
+                    </li>
+                ) : repos.length === 0 ? (
+                    <li className="flex justify-center py-5 px-5 mb-3 rounded-lg border border-gray-200">
+                        <p className="text-sm text-gray-500">No repositories found</p>
+                    </li>
+                ) : null}
                 {repos.map((repo) => (
                     <li key={repo.url} className="flex justify-between gap-x-6 py-5 px-5 mb-3 rounded-lg border border-gray-200 hover:cursor-pointer hover:bg-gray-100">
                         <div className="flex min-w-0 gap-x-4">
@@ -84,11 +98,23 @@ export default function Repositories() {
                         <div className="flex items-center mr-5">
                             {!repo.private ? (
                                 <div className="flex items-center">
-                                    <CheckCircleIcon className="h-6 w-6 text-green-500" aria-hidden="true" />
+                                    <Toggle initialState={repo.is_enabled} toggleUrl={`/api/github/repo/${repo.id}/toggle`} />
                                 </div>
                             ) : (
                                 <div className="flex items-center">
-                                    <XCircleIcon className="h-6 w-6 text-red-500" aria-hidden="true" />
+                                    {!repo.organization.is_paid && (
+                                    <a
+                                        href="/pricing"
+                                        className="ml-2 mr-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 hover:bg-indigo-200"
+                                    >
+                                        Upgrade
+                                    </a>
+                                    )}
+                                    <div className="relative inline-flex items-center">
+                                        <div className="w-10 h-6 bg-gray-300 rounded-full shadow-inner"></div>
+                                        <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow"></div>
+                                    </div>
+                                    
                                 </div>
                             )}
                         </div>

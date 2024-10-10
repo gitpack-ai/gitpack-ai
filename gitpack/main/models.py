@@ -18,8 +18,13 @@ class Pricing(models.Model):
 
 
 class Organization(models.Model):
+    class OrganizationType(models.TextChoices):
+        USER = 'user', 'User'
+        TEAM = 'team', 'Team'
+
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
+    organization_type = models.CharField(max_length=255, choices=OrganizationType.choices, default=OrganizationType.TEAM)
     url = models.URLField()
     avatar_url = models.URLField()
     third_party_id = models.IntegerField(unique=True)

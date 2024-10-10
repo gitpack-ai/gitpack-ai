@@ -44,7 +44,7 @@ export default function ClientLayout({
                 <div className="flex items-center">
                 <div className="flex-shrink-0">
                     <a href='/repositories'>
-                        <LogoComponent light={true} className="h-10 w-10 text-white" />
+                        <LogoComponent light="true" className="h-10 w-10 text-white" />
                     </a>
                 </div>
                 <div className="hidden md:block">
