@@ -3,24 +3,30 @@
 import React from 'react';
 import { ProtectedRoute, useUser } from '../../components/ProtectedRoute';
 
-export default function PricingPage() {
+function PricingPageContent() {
   const user = useUser();
 
   return (
-    <ProtectedRoute>
-        <div className="min-h-full">
-            <div className="mx-auto max-w-7xl px-4 py-6 my-10 sm:px-6 lg:px-8">
-                <h1 className="text-4xl font-bold text-center">Manage your plan</h1>
-                <div className="mt-10">
-                    <stripe-pricing-table 
-                        pricing-table-id={`${process.env.NEXT_PUBLIC_STRIPE_PRICING_TABLE_ID}`}
-                        publishable-key={`${process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}`}
-                        client-reference-id={user?.id.toString() ?? ''}
-                        customer-email={user?.email ?? ''}
-                    />
-                </div>
-            </div>
+    <div className="min-h-full">
+      <div className="mx-auto max-w-7xl px-4 py-6 my-10 sm:px-6 lg:px-8">
+        <h1 className="text-4xl font-bold text-center">Manage your plan</h1>
+        <div className="mt-10">
+          <stripe-pricing-table 
+            pricing-table-id={`${process.env.NEXT_PUBLIC_STRIPE_PRICING_TABLE_ID}`}
+            publishable-key={`${process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}`}
+            client-reference-id={user?.pk ?? ''}
+            customer-email={user?.email ?? ''}
+          />
         </div>
+      </div>
+    </div>
+  );
+}
+
+export default function PricingPage() {
+  return (
+    <ProtectedRoute>
+      <PricingPageContent />
     </ProtectedRoute>
   );
 }

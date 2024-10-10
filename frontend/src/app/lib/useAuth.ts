@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
 export interface User {
-  id: string;
+  pk: number;
   username: string;
   email: string;
   first_name: string;
