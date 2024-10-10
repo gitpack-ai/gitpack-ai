@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import { ProtectedRoute } from '../../components/ProtectedRoute';
 import fetchJson, {FetchError} from '../../lib/fetchJson';
-import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/solid';
 import Toggle from '../../components/Toggle';
+
 interface Repository {
   // Define the structure of a repository object
   id: number;

@@ -1,9 +1,11 @@
 'use client';
 
 import React from 'react';
-import { ProtectedRoute } from '../../components/ProtectedRoute';
+import { ProtectedRoute, useUser } from '../../components/ProtectedRoute';
 
 export default function PricingPage() {
+  const user = useUser();
+
   return (
     <ProtectedRoute>
         <div className="min-h-full">
@@ -13,6 +15,8 @@ export default function PricingPage() {
                     <stripe-pricing-table 
                         pricing-table-id={`${process.env.NEXT_PUBLIC_STRIPE_PRICING_TABLE_ID}`}
                         publishable-key={`${process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}`}
+                        client-reference-id={user?.id.toString() ?? ''}
+                        customer-email={user?.email ?? ''}
                     />
                 </div>
             </div>
