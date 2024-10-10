@@ -14,8 +14,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "GitPack",
-  description: "Automate Pull Request Reviews with AI",
+  title: "GitPack - Automate PR Reviews with AI",
+  description: "Automate Github Pull Request Reviews with AI",
 };
 
 export default function RootLayout({
