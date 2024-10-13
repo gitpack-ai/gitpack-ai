@@ -14,13 +14,14 @@ services:
     build:
       context: ./gitpack
       dockerfile: Dockerfile
-    command: gunicorn --bind 0.0.0.0:8000 --chdir /code gitpack.wsgi:application
+    command: python manage.py runserver 0.0.0.0:8000
+    #command: gunicorn --bind 0.0.0.0:8000 --capture-output --chdir /code gitpack.wsgi:application
     volumes:
       - ./gitpack:/code
     ports:
       - "8000:8000"
     env_file:
-      - .env
+      - ./gitpack/.env
     depends_on:
       - db
 
