@@ -14,7 +14,7 @@ const GitHubCallbackContent = () => {
     const exchangeCodeForToken = async (code: string) => {
       const status = await auth.loginWithGitHub(code);
       if (status) {
-        router.push('/dashboard');
+        router.push('/repositories');
       }
     };
 
