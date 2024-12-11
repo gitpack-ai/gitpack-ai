@@ -16,11 +16,38 @@ def handle_pull_request_opened(request, payload):
     repo_full_name = payload['repository']['full_name']
     pr_number = payload['pull_request']['number']
     pr_title = payload['pull_request']['title']
+    installation = payload.get('installation')
 
     gc = github_app.get_github_client(payload)
-    # Get the repository object
+    # Get the repository object from GitHub
     repo = gc.get_repo(repo_full_name)
-    repository = Repository.objects.get(third_party_id=repo.id)
+
+    # Get or create organization and repository
+    try:
+        repository = Repository.objects.get(third_party_id=repo.id)
+    except Repository.DoesNotExist:
+        # If repository doesn't exist, create it along with its organization
+        organization, _ = Organization.objects.get_or_create(
+            third_party_id=installation.get('id'),
+            defaults={
+                'name': installation.get('account').get('login'),
+                'url': installation.get('account').get('html_url'),
+                'avatar_url': installation.get('account').get('avatar_url')
+            }
+        )
+        
+        repository = Repository.objects.create(
+            third_party_id=repo.id,
+            name=repo.name,
+            full_name=repo_full_name,
+            description=repo.description or '',
+            url=f'https://github.com/{repo_full_name}',
+            private=repo.private,
+            organization=organization,
+            is_enabled=True  # Enable by default for newly created repositories
+        )
+        logging.info(f"Created new repository: {repo_full_name}")
+
     if not repository.is_enabled:
         logging.info(f"Pull request opened for disabled repository: {repo_full_name} (ID: {repo.id})")
         return JsonResponse({'status': f"Handled pull_request.opened: {pr_number}"}, status=200)
@@ -135,8 +162,11 @@ def handle_installation_repositories(request, payload):
             repo_name = repo.get('full_name')
             repo_id = repo.get('id')
             logging.info(f"GitHub App removed from repository: {repo_name} (ID: {repo_id})")
-            repository = Repository.objects.get(full_name=repo_name)
-            repository.delete()
+            try:
+                repository = Repository.objects.get(third_party_id=repo_id)
+                repository.delete()
+            except Repository.DoesNotExist:
+                logging.warning(f"Repository not found for deletion: {repo_name} (ID: {repo_id})")
     
     return JsonResponse({'status': 'Unhandled action for installation_repositories event'}, status=200)
 
@@ -190,7 +220,10 @@ def handle_installation_created(request, payload):
             repo_name = repo.get('full_name')
             repo_id = repo.get('id')
             logging.info(f"GitHub App installation deleted: {repo_name} (ID: {repo_id})")
-            repository = Repository.objects.get(full_name=repo_name)
-            repository.delete()
+            try:
+                repository = Repository.objects.get(third_party_id=repo_id)
+                repository.delete()
+            except Repository.DoesNotExist:
+                logging.warning(f"Repository not found for deletion: {repo_name} (ID: {repo_id})")
     
     return JsonResponse({'status': 'Unhandled action for installation event'}, status=200)
