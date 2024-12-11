@@ -1,7 +1,7 @@
 import github.PullRequest
 from ._github_webhook_wrapper import GithubApp
 from django.http import JsonResponse
-from main.lib.openai import OpenAIHelper
+from main.lib.ai_factory import get_ai_helper
 import logging
 import github
 import json
@@ -35,9 +35,9 @@ def handle_pull_request_opened(request, payload):
     commits = list(pull_request.get_commits())
     latest_commit = commits[-1]
 
-    # Initialize OpenAIHelper
-    openai_helper = OpenAIHelper()
-    overall_feedback, line_comments = openai_helper.get_code_review(files_changed) 
+    # Get the appropriate AI helper based on settings
+    ai_helper = get_ai_helper()
+    overall_feedback, line_comments = ai_helper.get_code_review(files_changed) 
 
     logging.debug(f"Overall feedback: {overall_feedback}")
     logging.debug(f"Line comments: {json.dumps(line_comments, indent=4, default=str)}")
@@ -194,4 +194,3 @@ def handle_installation_created(request, payload):
             repository.delete()
     
     return JsonResponse({'status': 'Unhandled action for installation event'}, status=200)
-

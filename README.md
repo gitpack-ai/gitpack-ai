@@ -17,7 +17,7 @@ Deploy GitPack AI quickly and easily with Render.com. Click the button above to 
 ## Prerequisites
 
 - Docker
-- OpenAI API Key
+- AI Provider API Key (OpenAI or Claude)
 - Github App
 
 ## Installation and Setup
@@ -33,9 +33,18 @@ Deploy GitPack AI quickly and easily with Render.com. Click the button above to 
    GITHUBAPP_ID=<your_github_app_id>
    GITHUBAPP_KEY=<your_github_app_private_key>
    GITHUB_WEBHOOK_SECRET=<your_github_webhook_secret>
+
+   # Choose your AI provider by setting GITPACK_AI_PROVIDER
+   # Options: 'openai' (default) or 'claude'
+   GITPACK_AI_PROVIDER=openai
+
+   # If using OpenAI
    GITPACK_OPENAI_ORGANIZATION=<your_openai_organization>
    GITPACK_OPENAI_PROJECT=<your_openai_project>
    GITPACK_OPENAI_API_KEY=<your_openai_api_key>
+
+   # If using Claude
+   GITPACK_ANTHROPIC_API_KEY=<your_anthropic_api_key>
    ```
 
 3. Create a `frontend/.env.local` file and add the following:
@@ -55,6 +64,26 @@ Deploy GitPack AI quickly and easily with Render.com. Click the button above to 
    - Backend: `http://localhost:8000`
    - Frontend: `http://localhost:3000`
    - Database: `localhost:5435`
+
+## Switching AI Providers
+
+GitPack AI supports multiple AI providers for code review. You can switch between them by updating your environment variables:
+
+### OpenAI (Default)
+```env
+GITPACK_AI_PROVIDER=openai
+GITPACK_OPENAI_ORGANIZATION=<your_openai_organization>
+GITPACK_OPENAI_PROJECT=<your_openai_project>
+GITPACK_OPENAI_API_KEY=<your_openai_api_key>
+```
+
+### Claude
+```env
+GITPACK_AI_PROVIDER=claude
+GITPACK_ANTHROPIC_API_KEY=<your_anthropic_api_key>
+```
+
+After changing providers, restart the application for the changes to take effect.
 
 ## Create a Github App
 To create a GitHub App for Gitpack AI, follow these steps:

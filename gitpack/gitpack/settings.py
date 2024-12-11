@@ -248,9 +248,16 @@ if not GITHUBAPP_KEY:
         GITHUBAPP_KEY = key_file.read().decode('utf-8')
 GITHUB_WEBHOOK_SECRET = os.environ.get('GITHUB_WEBHOOK_SECRET')
 
+# AI Provider Configuration
+AI_PROVIDER = os.environ.get('GITPACK_AI_PROVIDER', 'openai')  # 'openai' or 'claude'
+
+# OpenAI Configuration
 OPENAI_ORGANIZATION = os.environ.get('GITPACK_OPENAI_ORGANIZATION')
 OPENAI_PROJECT = os.environ.get('GITPACK_OPENAI_PROJECT')
 OPENAI_API_KEY = os.environ.get('GITPACK_OPENAI_API_KEY')
+
+# Claude Configuration
+ANTHROPIC_API_KEY = os.environ.get('GITPACK_ANTHROPIC_API_KEY')
 
 GITHUB_CLIENT_ID = os.environ.get('GITHUB_CLIENT_ID')
 GITHUB_CLIENT_SECRET = os.environ.get('GITHUB_CLIENT_SECRET')
