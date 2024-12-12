@@ -258,6 +258,8 @@ OPENAI_API_KEY = os.environ.get('GITPACK_OPENAI_API_KEY')
 
 # Claude Configuration
 ANTHROPIC_API_KEY = os.environ.get('GITPACK_ANTHROPIC_API_KEY')
+CLAUDE_MODEL = os.environ.get('CLAUDE_MODEL', 'claude-3-opus-20240229')
+CLAUDE_MAX_TOKENS = int(os.environ.get('CLAUDE_MAX_TOKENS', '1500'))
 
 GITHUB_CLIENT_ID = os.environ.get('GITHUB_CLIENT_ID')
 GITHUB_CLIENT_SECRET = os.environ.get('GITHUB_CLIENT_SECRET')
