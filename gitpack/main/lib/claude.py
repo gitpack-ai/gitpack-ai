@@ -8,6 +8,9 @@ class ClaudeHelper:
         self.client = Anthropic(
             api_key=settings.ANTHROPIC_API_KEY
         )
+        # Get model settings with defaults
+        self.model = getattr(settings, 'CLAUDE_MODEL', 'claude-3-opus-20240229')
+        self.max_tokens = getattr(settings, 'CLAUDE_MAX_TOKENS', 1500)
 
     def get_code_review(self, files_changed):
         all_code = ""
@@ -59,8 +62,8 @@ For multi-line code sections, provide feedback in a single feedback object.
 Remember to provide only the JSON response with no additional text."""
 
         response = self.client.messages.create(
-            model="claude-3-opus-20240229",
-            max_tokens=1500,
+            model=self.model,
+            max_tokens=self.max_tokens,
             messages=[{
                 "role": "user",
                 "content": prompt
