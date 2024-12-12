@@ -87,6 +87,8 @@ GITPACK_AI_PROVIDER=claude  # or 'openai'
 
 # If using Claude
 GITPACK_ANTHROPIC_API_KEY=  # Your Anthropic API key
+CLAUDE_MODEL=claude-3-opus-20240229  # Optional: Model to use (default: claude-3-opus-20240229)
+CLAUDE_MAX_TOKENS=1500  # Optional: Maximum tokens for response (default: 1500)
 
 # If using OpenAI
 GITPACK_OPENAI_ORGANIZATION=
@@ -163,6 +165,8 @@ Deploy GitPack AI quickly and easily with Render.com. Click the button above to 
      * GITHUB_WEBHOOK_SECRET
      * GITPACK_AI_PROVIDER
      * GITPACK_ANTHROPIC_API_KEY (if using Claude)
+     * CLAUDE_MODEL (optional, defaults to claude-3-opus-20240229)
+     * CLAUDE_MAX_TOKENS (optional, defaults to 1500)
      * GITHUB_CLIENT_ID (if deploying frontend)
      * GITHUB_CLIENT_SECRET (if deploying frontend)
    - Click "Manual Deploy" → "Deploy latest commit"
