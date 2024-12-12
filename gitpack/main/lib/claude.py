@@ -61,15 +61,28 @@ For multi-line code sections, provide feedback in a single feedback object.
 
 Remember to provide only the JSON response with no additional text."""
 
-        response = self.client.messages.create(
-            model=self.model,
-            max_tokens=self.max_tokens,
-            messages=[{
-                "role": "user",
-                "content": prompt
-            }],
-            system="You are a Staff or Principal level Software Engineer performing code reviews. Focus only on high-quality, impactful feedback."
-        )
+        try:
+            response = self.client.messages.create(
+                model=self.model,
+                max_tokens=self.max_tokens,
+                messages=[{
+                    "role": "user",
+                    "content": prompt
+                }],
+                system="You are a Staff or Principal level Software Engineer performing code reviews. Focus only on high-quality, impactful feedback."
+            )
+        except anthropic.APIConnectionError as e:
+            logging.error('Network error when calling Claude API: %s', str(e))
+            raise ValueError('Failed to connect to Claude API') from e
+        except anthropic.APIError as e:
+            logging.error('Claude API error: %s', str(e))
+            raise ValueError('Claude API returned an error') from e
+        except anthropic.RateLimitError as e:
+            logging.error('Claude API rate limit exceeded: %s', str(e))
+            raise ValueError('Claude API rate limit exceeded') from e
+        except Exception as e:
+            logging.error('Unexpected error calling Claude API: %s', str(e))
+            raise ValueError('Unexpected error when calling Claude API') from e
         
         response_content = response.content[0].text
         try:
