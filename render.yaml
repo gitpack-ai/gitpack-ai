@@ -1,13 +1,13 @@
 databases:
-- name: gitpackdb
-  databaseName: gitpack
-  user: gitpack
-  plan: free
-  region: oregon
-  ipAllowList:
-  - source: 0.0.0.0/0
-    description: everywhere
-  postgresMajorVersion: "16"
+  - name: gitpackdb
+    databaseName: gitpack
+    user: gitpack
+    plan: free
+    region: oregon
+    ipAllowList:
+    - source: 0.0.0.0/0
+      description: everywhere
+    postgresMajorVersion: "16"
 version: "1"
 
 services:
@@ -16,7 +16,8 @@ services:
     name: gitpack
     runtime: python
     buildCommand: "./build.sh"
-    startCommand: "python -m gunicorn --chdir gitpack gitpack.wsgi:application -k uvicorn.workers.UvicornWorker"
+    # Using standard WSGI setup without uvicorn workers
+    startCommand: "gunicorn --chdir gitpack gitpack.wsgi:application"
     envVars:
       - key: DATABASE_URL
         fromDatabase:
