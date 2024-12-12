@@ -6,13 +6,6 @@ Get Faster, Smarter Code Reviews on Any GitHub Repo!
 [https://gitpack.co](https://gitpack.co)
 
 
-## Quick Deploy
-
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/gitpack-ai/gitpack-ai)
-
-Deploy GitPack AI quickly and easily with Render.com. Click the button above to start the deployment process.
-
-
 ## Prerequisites
 
 - Docker
@@ -140,6 +133,9 @@ After changing providers:
 
 ### Quick Deploy
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/gitpack-ai/gitpack-ai)
+
+Deploy GitPack AI quickly and easily with Render.com. Click the button above to start the deployment process.
+
 
 ### Testing with a Forked Repository
 
