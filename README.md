@@ -3,8 +3,6 @@
 #### Automate Pull Request Reviews with AI 🪄
 Get Faster, Smarter Code Reviews on Any GitHub Repo!
 
-[https://gitpack.co](https://gitpack.co)
-
 
 ## Prerequisites
 
